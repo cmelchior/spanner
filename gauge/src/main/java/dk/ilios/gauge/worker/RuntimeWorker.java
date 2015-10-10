@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
@@ -103,8 +104,7 @@ public abstract class RuntimeWorker extends Worker {
      * the estimated number of reps.
      */
     @VisibleForTesting
-    static long calculateTargetReps(long reps, long nanos, long targetNanos,
-                                    double gaussian) {
+    static long calculateTargetReps(long reps, long nanos, long targetNanos, double gaussian) {
         double targetReps = (((double) reps) / nanos) * targetNanos;
         return Math.max(1L, Math.round((gaussian * (targetReps / 5)) + targetReps));
     }
@@ -162,8 +162,8 @@ public abstract class RuntimeWorker extends Worker {
     }
 
     private static final class Options {
-        long timingIntervalNanos = 5000;
-        boolean gcBeforeEach = true;
+        long timingIntervalNanos = TimeUnit.MILLISECONDS.toNanos(1000);
+        boolean gcBeforeEach = false;
 
         Options(Map<String, String> optionMap) {
 //            this.timingIntervalNanos = Long.parseLong(optionMap.get("timingIntervalNanos"));

@@ -17,9 +17,10 @@
 package dk.ilios.gauge.bridge;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import dk.ilios.gauge.model.Measurement;
 
@@ -27,35 +28,44 @@ import dk.ilios.gauge.model.Measurement;
  * A message signaling that the timing interval has ended in the worker.
  */
 public class StopMeasurementLogMessage extends LogMessage implements Serializable {
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  private final ImmutableList<Measurement> measurements;
+    private Collection<Measurement> measurements = new ArrayList<Measurement>();
 
-  public StopMeasurementLogMessage(Iterable<Measurement> measurements) {
-    this.measurements = ImmutableList.copyOf(measurements);
-  }
-
-  public ImmutableList<Measurement> measurements() {
-    return measurements;
-  }
-
-  @Override public void accept(LogMessageVisitor visitor) {
-    visitor.visit(this);
-  }
-
-  @Override public int hashCode() {
-    return Objects.hashCode(measurements);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    } else if (obj instanceof StopMeasurementLogMessage) {
-      StopMeasurementLogMessage that = (StopMeasurementLogMessage) obj;
-      return this.measurements.equals(that.measurements);
-    } else {
-      return false;
+    public StopMeasurementLogMessage(Collection<Measurement> measurements) {
+        this.measurements.addAll(measurements);
     }
-  }
+
+    public void setMeasurements(Iterable<Measurement> measurements) {
+        this.measurements.clear();
+        for (Measurement measurement : measurements) {
+            this.measurements.add(measurement);
+        }
+    }
+
+    public Collection<Measurement> measurements() {
+        return measurements;
+    }
+
+    @Override
+    public void accept(LogMessageVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(measurements);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof StopMeasurementLogMessage) {
+            StopMeasurementLogMessage that = (StopMeasurementLogMessage) obj;
+            return this.measurements.equals(that.measurements);
+        } else {
+            return false;
+        }
+    }
 }

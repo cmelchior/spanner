@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.SortedMap;
 
+import dk.ilios.gauge.json.ExcludeFromJson;
 import dk.ilios.gauge.util.StringMapFunnel;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,91 +36,91 @@ import static dk.ilios.gauge.util.PersistentHashing.getPersistentHashFunction;
  * @author gak@google.com (Gregory Kick)
  */
 public final class InstrumentSpec {
-  static final InstrumentSpec DEFAULT = new InstrumentSpec();
 
-  private int id;
-  private String className;
-  private SortedMap<String, String> options;
-  private int hash;
-
-  private InstrumentSpec() {
-    this.className = "";
-    this.options = Maps.newTreeMap();
-  }
-
-  private InstrumentSpec(Builder builder) {
-    this.className = builder.className;
-    this.options = Maps.newTreeMap(builder.options);
-  }
-
-  public String className() {
-    return className;
-  }
-
-  public ImmutableSortedMap<String, String> options() {
-    return ImmutableSortedMap.copyOf(options);
-  }
-
-  @Override public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    } else if (obj instanceof InstrumentSpec) {
-      InstrumentSpec that = (InstrumentSpec) obj;
-      return this.className.equals(that.className)
-          && this.options.equals(that.options);
-    } else {
-      return false;
-    }
-  }
-
-  private void initHash() {
-    if (hash == 0) {
-      this.hash = getPersistentHashFunction()
-          .newHasher()
-          .putUnencodedChars(className)
-          .putObject(options, StringMapFunnel.INSTANCE)
-          .hash().asInt();
-    }
-  }
-
-  @Override public int hashCode() {
-    initHash();
-    return hash;
-  }
-
-  @Override public String toString() {
-    return Objects.toStringHelper(this)
-        .add("className", className)
-        .add("options", options)
-        .toString();
-  }
-
-  public static final class Builder {
+    @ExcludeFromJson
+    private int id;
     private String className;
-    private final SortedMap<String, String> options = Maps.newTreeMap();
+    private SortedMap<String, String> options;
 
-    public Builder className(String className) {
-      this.className = checkNotNull(className);
-      return this;
+    @ExcludeFromJson
+    private int hash;
+
+    private InstrumentSpec(Builder builder) {
+        this.className = builder.className;
+        this.options = Maps.newTreeMap(builder.options);
     }
 
-    public Builder instrumentClass(Class<?> insturmentClass) {
-      return className(insturmentClass.getName());
+    public String className() {
+        return className;
     }
 
-    public Builder addOption(String option, String value) {
-      this.options.put(option, value);
-      return this;
+    public ImmutableSortedMap<String, String> options() {
+        return ImmutableSortedMap.copyOf(options);
     }
 
-    public Builder addAllOptions(Map<String, String> options) {
-      this.options.putAll(options);
-      return this;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof InstrumentSpec) {
+            InstrumentSpec that = (InstrumentSpec) obj;
+            return this.className.equals(that.className)
+                    && this.options.equals(that.options);
+        } else {
+            return false;
+        }
     }
 
-    public InstrumentSpec build() {
-      checkState(className != null);
-      return new InstrumentSpec(this);
+    private void initHash() {
+        if (hash == 0) {
+            this.hash = getPersistentHashFunction()
+                    .newHasher()
+                    .putUnencodedChars(className)
+                    .putObject(options, StringMapFunnel.INSTANCE)
+                    .hash().asInt();
+        }
     }
-  }
+
+    @Override
+    public int hashCode() {
+        initHash();
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("className", className)
+                .add("options", options)
+                .toString();
+    }
+
+    public static final class Builder {
+        private String className;
+        private final SortedMap<String, String> options = Maps.newTreeMap();
+
+        public Builder className(String className) {
+            this.className = checkNotNull(className);
+            return this;
+        }
+
+        public Builder instrumentClass(Class<?> insturmentClass) {
+            return className(insturmentClass.getName());
+        }
+
+        public Builder addOption(String option, String value) {
+            this.options.put(option, value);
+            return this;
+        }
+
+        public Builder addAllOptions(Map<String, String> options) {
+            this.options.putAll(options);
+            return this;
+        }
+
+        public InstrumentSpec build() {
+            checkState(className != null);
+            return new InstrumentSpec(this);
+        }
+    }
 }

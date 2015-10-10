@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import dk.ilios.gauge.bridge.AbstractLogMessageVisitor;
 import dk.ilios.gauge.bridge.StopMeasurementLogMessage;
 import dk.ilios.gauge.internal.trial.TrialSchedulingPolicy;
+import dk.ilios.gauge.json.ExcludeFromJson;
 import dk.ilios.gauge.model.InstrumentSpec;
 import dk.ilios.gauge.model.Measurement;
 import dk.ilios.gauge.worker.Worker;
@@ -73,6 +74,8 @@ public abstract class Instrument {
      */
     // TODO(gak): consider passing in Instrument explicitly for DI
     public abstract class Instrumentation {
+
+        @ExcludeFromJson
         protected Method benchmarkMethod;
 
         protected Instrumentation(Method benchmarkMethod) {

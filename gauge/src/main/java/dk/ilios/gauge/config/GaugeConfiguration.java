@@ -41,7 +41,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import dk.ilios.gauge.ResultProcessor;
+import dk.ilios.gauge.output.ResultProcessor;
 import dk.ilios.gauge.util.Util;
 
 /**

@@ -60,8 +60,7 @@ public final class GsonModule extends AbstractModule {
   @BindingAnnotation
   private @interface ForInstant {}
 
-  @Provides @ForInstant TypeAdapterFactory provideTypeAdapterFactoryForInstant(
-      InstantTypeAdapter typeAdapter) {
+  @Provides @ForInstant TypeAdapterFactory provideTypeAdapterFactoryForInstant(InstantTypeAdapter typeAdapter) {
     return TypeAdapters.newFactory(Instant.class, typeAdapter);
   }
 

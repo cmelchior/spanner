@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package dk.ilios.gauge;
+package dk.ilios.gauge.json;
 
-import java.io.Closeable;
-
-import dk.ilios.gauge.model.Trial;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 
 /**
- * Interface for processing results as they complete. Callers must invoke {@link #close()} after
- * all trials have been {@linkplain #processTrial processed}.
+ * An exclusion strategy that excludes elements annotated with {@link ExcludeFromJson}.
  */
-public interface ResultProcessor extends Closeable {
-  void processTrial(Trial trial);
+public final class AnnotationExclusionStrategy implements ExclusionStrategy {
+  @Override public boolean shouldSkipField(FieldAttributes f) {
+    return f.getAnnotation(ExcludeFromJson.class) != null;
+  }
+
+  @Override public boolean shouldSkipClass(Class<?> clazz) {
+    return clazz.getAnnotation(ExcludeFromJson.class) != null;
+  }
 }

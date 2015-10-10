@@ -29,18 +29,11 @@ import static dk.ilios.gauge.util.PersistentHashing.getPersistentHashFunction;
  * @author gak@google.com (Gregory Kick)
  */
 public final class Scenario {
-    static final Scenario DEFAULT = new Scenario();
-
     private int id;
     private Host host;
     private BenchmarkSpec benchmarkSpec;
     // TODO(gak): include data about caliper itself and the code being benchmarked
     private int hash;
-
-    private Scenario() {
-        this.host = Host.DEFAULT;
-        this.benchmarkSpec = BenchmarkSpec.DEFAULT;
-    }
 
     private Scenario(Builder builder) {
         this.host = builder.host;

@@ -33,7 +33,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -42,7 +41,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import dk.ilios.gauge.ResultProcessor;
+import dk.ilios.gauge.output.ResultProcessor;
 import dk.ilios.gauge.exception.SkipThisScenarioException;
 import dk.ilios.gauge.exception.TrialFailureException;
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
@@ -272,7 +271,6 @@ public final class ExperimentingGaugeRun implements GaugeRun {
                 BenchmarkSpec benchmarkSpec = new BenchmarkSpec.Builder()
                         .className(experiment.instrumentation().benchmarkMethod().getDeclaringClass().getName())
                         .methodName(experiment.instrumentation().benchmarkMethod().getName())
-                        .benchmarkClass(selector.benchmarkClass())
                         .addAllParameters(experiment.userParameters())
                         .build();
 

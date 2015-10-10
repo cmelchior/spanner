@@ -3,9 +3,12 @@ package dk.ilios.gauge;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.bind.TypeAdapters;
 
 import org.threeten.bp.Instant;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
@@ -23,11 +26,15 @@ import dk.ilios.gauge.internal.ExperimentingGaugeRun;
 import dk.ilios.gauge.internal.Instrument;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
+import dk.ilios.gauge.json.AnnotationExclusionStrategy;
+import dk.ilios.gauge.json.InstantTypeAdapter;
 import dk.ilios.gauge.log.AndroidStdOut;
 import dk.ilios.gauge.log.StdOut;
 import dk.ilios.gauge.model.Run;
 import dk.ilios.gauge.options.GaugeOptions;
 import dk.ilios.gauge.options.CommandLineOptions;
+import dk.ilios.gauge.output.OutputFileDumper;
+import dk.ilios.gauge.output.ResultProcessor;
 import dk.ilios.gauge.util.NanoTimeGranularityTester;
 import dk.ilios.gauge.util.ShortDuration;
 import dk.ilios.gauge.util.Util;
@@ -41,6 +48,7 @@ public class Gauge {
 
     private final Class<?> benchmarkClass;
     private final Method method;
+    private GaugeConfig benchmarkConfig;
 
     public static void runBenchmark(Class benchmarkClass, Method method) {
         new Gauge(benchmarkClass, method).start();
@@ -54,6 +62,9 @@ public class Gauge {
     public void start() {
         try {
 
+            BenchmarkClass benchmarkClassWrapper = new BenchmarkClass(benchmarkClass, method);
+            benchmarkConfig = benchmarkClassWrapper.getConfiguration();
+
             // Setup components needed by the Runner
             GaugeOptions options = CommandLineOptions.parse(new String[]{benchmarkClass.getCanonicalName()});
             CaliperConfigLoader configLoader = new CaliperConfigLoader(options);
@@ -65,7 +76,6 @@ public class Gauge {
             ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(poolSize));
 
             StdOut stdOut = new AndroidStdOut();
-            BenchmarkClass benchmarkClassWrapper = new BenchmarkClass(benchmarkClass, method);
             Run runInfo = new Run.Builder(UUID.randomUUID())
                     .label("Gauge benchmark test")
                     .startTime(Instant.now())
@@ -75,7 +85,10 @@ public class Gauge {
 
             ExperimentSelector experimentSelector = new AndroidExperimentSelector(benchmarkClassWrapper, method, instruments);
 
-            ImmutableSet<ResultProcessor> resultProcessors = ImmutableSet.of();
+            GsonBuilder gsonBuilder = new GsonBuilder().setExclusionStrategies(new AnnotationExclusionStrategy());
+            gsonBuilder.registerTypeAdapterFactory(TypeAdapters.newFactory(Instant.class, new InstantTypeAdapter()));
+            OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClassWrapper, gsonBuilder.create(), benchmarkConfig);
+            ImmutableSet<ResultProcessor> resultProcessors = ImmutableSet.<ResultProcessor>of(dumper);
 
             // Configure runner
             GaugeRun run = new ExperimentingGaugeRun(

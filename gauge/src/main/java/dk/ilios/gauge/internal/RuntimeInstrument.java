@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -218,8 +219,8 @@ public class RuntimeInstrument extends Instrument {
         @Override
         MeasurementCollectingVisitor getMeasurementCollectingVisitor() {
             return new RepetitionBasedMeasurementCollector(
-                    1,
-                    ShortDuration.of(10, TimeUnit.SECONDS),
+                    9,
+                    ShortDuration.of(0, TimeUnit.SECONDS),
                     ShortDuration.of(10, TimeUnit.MINUTES),
                     true,
                     timerGranularityNanoSec);
@@ -330,7 +331,7 @@ public class RuntimeInstrument extends Instrument {
         @Override
         public void visit(StopMeasurementLogMessage logMessage) {
             checkState(measuring);
-            ImmutableList<Measurement> newMeasurements = logMessage.measurements();
+            Collection<Measurement> newMeasurements = logMessage.measurements();
             if (!isWarmupComplete()) {
                 for (Measurement measurement : newMeasurements) {
                     // TODO(gak): eventually we will need to resolve different units

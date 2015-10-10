@@ -28,6 +28,7 @@ import org.threeten.bp.Instant;
 import java.util.UUID;
 
 import dk.ilios.gauge.config.GaugeConfiguration;
+import dk.ilios.gauge.json.ExcludeFromJson;
 import dk.ilios.gauge.options.GaugeOptions;
 
 /**
@@ -38,7 +39,10 @@ public final class Run {
     private UUID id;
     private String label;
     private Instant startTime;
+
+    @ExcludeFromJson
     private GaugeConfiguration configuration;
+    @ExcludeFromJson
     private GaugeOptions options;
 
     private Run(Builder builder) {

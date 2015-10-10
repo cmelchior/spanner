@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
+import dk.ilios.gauge.json.ExcludeFromJson;
 import dk.ilios.gauge.util.StringMapFunnel;
 
 /**
@@ -42,27 +43,18 @@ import dk.ilios.gauge.util.StringMapFunnel;
 public final class BenchmarkSpec implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    static final BenchmarkSpec DEFAULT = new BenchmarkSpec();
-    private final BenchmarkClass benchmarkClass;
-
     private int id;
     private String className;
     private String methodName;
     private SortedMap<String, String> parameters;
-    private int hash;
 
-    private BenchmarkSpec() {
-        this.className = "";
-        this.methodName = "";
-        this.parameters = Maps.newTreeMap();
-        this.benchmarkClass = null;
-    }
+    @ExcludeFromJson
+    private int hash;
 
     private BenchmarkSpec(Builder builder) {
         this.className = builder.className;
         this.methodName = builder.methodName;
         this.parameters = Maps.newTreeMap(builder.parameters);
-        this.benchmarkClass = builder.benchmarkClass;
     }
 
     public String className() {
@@ -128,7 +120,6 @@ public final class BenchmarkSpec implements Serializable {
         private String className;
         private String methodName;
         private final SortedMap<String, String> parameters = Maps.newTreeMap();
-        private BenchmarkClass benchmarkClass;
 
         public Builder className(String className) {
             this.className = checkNotNull(className);
@@ -153,14 +144,7 @@ public final class BenchmarkSpec implements Serializable {
         public BenchmarkSpec build() {
             checkState(className != null);
             checkState(methodName != null);
-            checkState(benchmarkClass != null);
             return new BenchmarkSpec(this);
-        }
-
-        public Builder benchmarkClass(BenchmarkClass benchmarks) {
-            checkNotNull(benchmarks);
-            this.benchmarkClass = benchmarks;
-            return this;
         }
     }
 }

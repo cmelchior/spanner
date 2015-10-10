@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Logger;
 
+import dk.ilios.gauge.json.ExcludeFromJson;
 import dk.ilios.gauge.util.StringMapFunnel;
 
 /**
@@ -39,16 +40,13 @@ import dk.ilios.gauge.util.StringMapFunnel;
  * @author gak@google.com (Gregory Kick)
  */
 public final class Host {
-    static final Host DEFAULT = new Host();
     private static final Logger logger = Logger.getLogger(Host.class.getName());
 
     private int id;
     private SortedMap<String, String> properties;
-    private int hash;
 
-    private Host() {
-        this.properties = Maps.newTreeMap();
-    }
+    @ExcludeFromJson
+    private int hash;
 
     private Host(Builder builder) {
         this.properties = Maps.newTreeMap(builder.properties);

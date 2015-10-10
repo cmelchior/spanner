@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
@@ -95,8 +96,6 @@ public class AndroidUnitTestTrial implements Callable<Trial.Result> {
 //        }
 
 
-
-
 //        log.notifyWorkerStarted(request.trialId); // StartupAnnounceMessage
         worker.setUpBenchmark();
 //        log.notifyBootstrapPhaseStarting(); // String
@@ -106,16 +105,20 @@ public class AndroidUnitTestTrial implements Callable<Trial.Result> {
         boolean keepMeasuring = true;
         boolean isInWarmup = true;
         boolean doneCollecting = false;
+
+        StopMeasurementLogMessage stopMessage = new StopMeasurementLogMessage(Collections.EMPTY_LIST);
+        ShouldContinueMessage continueMessage = new ShouldContinueMessage();
         while (keepMeasuring) {
             new StartMeasurementLogMessage().accept(measurementCollectingVisitor);
             worker.preMeasure(isInWarmup);
-            new StopMeasurementLogMessage(worker.measure()).accept(measurementCollectingVisitor);
+            stopMessage.setMeasurements(worker.measure());
+            stopMessage.accept(measurementCollectingVisitor);
             if (!doneCollecting && measurementCollectingVisitor.isDoneCollecting()) {
                 doneCollecting = true;
             }
-            ShouldContinueMessage msg = new ShouldContinueMessage(!doneCollecting, measurementCollectingVisitor.isWarmupComplete());
-            keepMeasuring = msg.shouldContinue();
-            isInWarmup = !msg.isWarmupComplete();
+            continueMessage.update(!doneCollecting, measurementCollectingVisitor.isWarmupComplete());
+            keepMeasuring = continueMessage.shouldContinue();
+            isInWarmup = !continueMessage.isWarmupComplete();
             worker.postMeasure();
         }
         worker.tearDownBenchmark();
@@ -125,12 +128,12 @@ public class AndroidUnitTestTrial implements Callable<Trial.Result> {
     }
 
 
-    private long getTrialTimeLimitTrialNanos(){
-        ShortDuration timeLimit=options.timeLimit();
-        if(ShortDuration.zero().equals(timeLimit)){
-        return Long.MAX_VALUE;
+    private long getTrialTimeLimitTrialNanos() {
+        ShortDuration timeLimit = options.timeLimit();
+        if (ShortDuration.zero().equals(timeLimit)) {
+            return Long.MAX_VALUE;
         }
         return timeLimit.to(NANOSECONDS);
-        }
+    }
 
-        }
+}

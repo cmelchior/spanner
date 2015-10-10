@@ -33,6 +33,7 @@ import java.util.UUID;
 
 import dk.ilios.gauge.internal.Experiment;
 import dk.ilios.gauge.internal.trial.TrialContext;
+import dk.ilios.gauge.json.ExcludeFromJson;
 
 /**
  * An invocation of a single {@link Experiment}.
@@ -41,6 +42,7 @@ import dk.ilios.gauge.internal.trial.TrialContext;
  * to the object Trial object will fail.
  */
 public final class Trial {
+
     private UUID id;
     private Run run;
     private InstrumentSpec instrumentSpec;
@@ -48,10 +50,9 @@ public final class Trial {
     private Experiment experiment;
     private List<Measurement> measurements = new ArrayList<Measurement>();
     private List<String> messages = new ArrayList<String>();
-    private boolean trialComplete;
 
-    private Object benchmarkClassInstance;
-    private Method benchmarkMethod;
+    @ExcludeFromJson
+    private boolean trialComplete;
 
     private Trial(Builder builder) {
         this.id = builder.id;

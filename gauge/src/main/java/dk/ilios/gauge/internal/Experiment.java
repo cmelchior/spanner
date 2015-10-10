@@ -30,40 +30,43 @@ import java.util.Map;
  * FullCartesianExperimentSelector, and will run one or more trials of each.
  */
 public final class Experiment {
-  private final Instrument.Instrumentation instrumentation;
-  private final ImmutableSortedMap<String, String> userParameters;
+    private final Instrument.Instrumentation instrumentation;
+    private final ImmutableSortedMap<String, String> userParameters;
 
-  Experiment(Instrument.Instrumentation instrumentation, Map<String, String> userParameters) {
-    this.instrumentation = checkNotNull(instrumentation);
-    this.userParameters = ImmutableSortedMap.copyOf(userParameters);
-  }
-
-    public Instrument.Instrumentation  instrumentation() {
-    return instrumentation;
-  }
-
-  ImmutableSortedMap<String, String> userParameters() {
-    return userParameters;
-  }
-
-  @Override public boolean equals(Object object) {
-    if (object instanceof Experiment) {
-      Experiment that = (Experiment) object;
-      return this.instrumentation.equals(that.instrumentation)
-          && this.userParameters.equals(that.userParameters);
+    Experiment(Instrument.Instrumentation instrumentation, Map<String, String> userParameters) {
+        this.instrumentation = checkNotNull(instrumentation);
+        this.userParameters = ImmutableSortedMap.copyOf(userParameters);
     }
-    return false;
-  }
 
-  @Override public int hashCode() {
-    return Objects.hashCode(instrumentation, userParameters);
-  }
+    public Instrument.Instrumentation instrumentation() {
+        return instrumentation;
+    }
 
-  @Override public String toString() {
-    return Objects.toStringHelper("")
-        .add("instrument", instrumentation.instrument())
-        .add("benchmarkMethod", instrumentation.benchmarkMethod.getName())
-        .add("parameters", userParameters)
-        .toString();
-  }
+    public ImmutableSortedMap<String, String> userParameters() {
+        return userParameters;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Experiment) {
+            Experiment that = (Experiment) object;
+            return this.instrumentation.equals(that.instrumentation)
+                    && this.userParameters.equals(that.userParameters);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(instrumentation, userParameters);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper("")
+                .add("instrument", instrumentation.instrument())
+                .add("benchmarkMethod", instrumentation.benchmarkMethod.getName())
+                .add("parameters", userParameters)
+                .toString();
+    }
 }

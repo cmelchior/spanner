@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,6 +33,8 @@ import java.util.logging.Logger;
 
 import dk.ilios.gauge.AfterExperiment;
 import dk.ilios.gauge.BeforeExperiment;
+import dk.ilios.gauge.BenchmarkConfiguration;
+import dk.ilios.gauge.GaugeConfig;
 import dk.ilios.gauge.Param;
 import dk.ilios.gauge.api.VmOptions;
 import dk.ilios.gauge.exception.InvalidCommandException;
@@ -41,7 +44,7 @@ import dk.ilios.gauge.exception.UserCodeException;
 import dk.ilios.gauge.util.Reflection;
 
 /**
- * An instance of this type represents a user-provided class. It manages creating, setting up and
+ * An instance of this type represents a user-provided class benchmark class. It manages creating, setting up and
  * destroying instances of that class.
  */
 public final class BenchmarkClass {
@@ -51,7 +54,6 @@ public final class BenchmarkClass {
     private final Object classInstance;
     private final Method method;
     private final ParameterSet userParameters;
-    private final ImmutableSet<String> benchmarkFlags;
 
     public BenchmarkClass(Class<?> benchmarkClass, Method method) throws InvalidBenchmarkException {
         this.classReference = checkNotNull(benchmarkClass);
@@ -64,22 +66,57 @@ public final class BenchmarkClass {
         }
 
         if (Modifier.isAbstract(benchmarkClass.getModifiers())) {
-            throw new InvalidBenchmarkException("Class '%s' is abstract", benchmarkClass);
+            throw new InvalidBenchmarkException("Class '%s' must not be abstract", benchmarkClass);
         }
 
-        // TODO: check for nested, non-static classes (non-abstract, but no constructor?)
-        // this will fail later anyway (no way to declare parameterless nested constr., but
-        // maybe signal this better?
-
         this.userParameters = ParameterSet.create(benchmarkClass, Param.class);
-        this.benchmarkFlags = getVmOptions(benchmarkClass);
         try {
             classInstance = benchmarkClass.newInstance();
-        } catch (InstantiationException e) {
+        } catch (InstantiationException  e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the simple name of the class that is being benchmarked.
+     */
+    public String getSimpleName() {
+        return classReference.getSimpleName();
+    }
+
+    /**
+     * Returns a instance of the Benchmark class.
+     */
+    public Object getInstance() {
+        return classInstance;
+    }
+
+    /**
+     * Returns the configuration for this class or the default configuration if no configuration is provided.
+     */
+    public GaugeConfig getConfiguration() {
+        for (Field field : classReference.getDeclaredFields()) {
+            if (field.isAnnotationPresent(BenchmarkConfiguration.class)) {
+                try {
+                    field.setAccessible(true);
+                    return (GaugeConfig) field.get(classInstance);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        return new GaugeConfig.Builder().build();
+    }
+
+
+    /**
+     * Returns the method should should be benchmarked.
+     */
+    public Method getMethod() {
+        return method;
     }
 
     ImmutableSet<Method> beforeExperimentMethods() {
@@ -121,11 +158,6 @@ public final class BenchmarkClass {
 
     public void cleanup(Object benchmark) throws UserCodeException {
         callTearDown(benchmark);
-    }
-
-    @VisibleForTesting
-    public Class<?> benchmarkClass() {
-        return classReference;
     }
 
     public String name() {
@@ -182,13 +214,6 @@ public final class BenchmarkClass {
         }
     }
 
-    private static ImmutableSet<String> getVmOptions(Class<?> benchmarkClass) {
-        VmOptions annotation = benchmarkClass.getAnnotation(VmOptions.class);
-        return (annotation == null)
-                ? ImmutableSet.<String>of()
-                : ImmutableSet.copyOf(annotation.value());
-    }
-
     void validateParameters(ImmutableSetMultimap<String, String> parameters)
             throws InvalidCommandException {
         for (String paramName : parameters.keySet()) {
@@ -203,23 +228,5 @@ public final class BenchmarkClass {
                 throw new InvalidCommandException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Returns the simple name of the Benchmark class.
-     */
-    public String getSimpleName() {
-        return classReference.getSimpleName();
-    }
-
-    /**
-     * Returns a instance of the Benchmark class.
-     */
-    public Object getInstance() {
-        return classInstance;
-    }
-
-    public Method getMethod() {
-        return method;
     }
 }
