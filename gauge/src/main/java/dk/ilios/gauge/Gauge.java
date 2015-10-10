@@ -1,8 +1,11 @@
 package dk.ilios.gauge;
 
+import android.util.ArraySet;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
 
@@ -11,6 +14,8 @@ import org.threeten.bp.Instant;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -19,6 +24,7 @@ import dk.ilios.gauge.config.CaliperConfigLoader;
 import dk.ilios.gauge.config.InstrumentConfig;
 import dk.ilios.gauge.config.InvalidConfigurationException;
 import dk.ilios.gauge.exception.InvalidCommandException;
+import dk.ilios.gauge.http.HttpUploader;
 import dk.ilios.gauge.internal.AndroidExperimentSelector;
 import dk.ilios.gauge.internal.GaugeRun;
 import dk.ilios.gauge.internal.ExperimentSelector;
@@ -87,8 +93,18 @@ public class Gauge {
 
             GsonBuilder gsonBuilder = new GsonBuilder().setExclusionStrategies(new AnnotationExclusionStrategy());
             gsonBuilder.registerTypeAdapterFactory(TypeAdapters.newFactory(Instant.class, new InstantTypeAdapter()));
-            OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClassWrapper, gsonBuilder.create(), benchmarkConfig);
-            ImmutableSet<ResultProcessor> resultProcessors = ImmutableSet.<ResultProcessor>of(dumper);
+            Gson gson = gsonBuilder.create();
+
+
+            Set<ResultProcessor> processors = new HashSet<>();
+            OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClassWrapper, gson, benchmarkConfig);
+            processors.add(dumper);
+            if (benchmarkConfig.isUploadResults()) {
+                HttpUploader uploader = new HttpUploader(stdOut, gson, benchmarkConfig);
+                processors.add(uploader);
+            }
+
+            ImmutableSet<ResultProcessor> resultProcessors = ImmutableSet.copyOf(processors);
 
             // Configure runner
             GaugeRun run = new ExperimentingGaugeRun(

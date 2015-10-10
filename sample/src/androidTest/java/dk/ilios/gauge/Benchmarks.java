@@ -7,6 +7,7 @@ import android.support.test.InstrumentationRegistry;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
+import dk.ilios.caliperx.caliperx.test.BuildConfig;
 import dk.ilios.gauge.config.GaugeConfiguration;
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
 import dk.ilios.gauge.runner.GaugeRunner;
@@ -18,6 +19,8 @@ public class Benchmarks {
     @BenchmarkConfiguration
     GaugeConfig configuration = new GaugeConfig.Builder()
             .resultsFolder(InstrumentationRegistry.getTargetContext().getFilesDir())
+            .uploadResults()
+            .apiKey(BuildConfig.CALIPER_API_KEY)
             .build();
 
     private Object obj1 = new Object();

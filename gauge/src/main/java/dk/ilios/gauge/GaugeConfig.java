@@ -1,22 +1,30 @@
 package dk.ilios.gauge;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Class for adding custom configuration of a Gauge run.
  */
 public class GaugeConfig {
 
-    private File resultsFolder;
-    private File baseLineFile;
-    private boolean warnIfWrongTestGranularity;
+    private final File resultsFolder;
+    private final File baseLineFile;
+    private final boolean warnIfWrongTestGranularity;
     private final boolean createBaseLine;
+    private final URL uploadUrl;
+    private final String apiKey;
+    private final boolean uploadResults;
 
     private GaugeConfig(Builder builder) {
         this.resultsFolder = builder.resultsFolder;
         this.baseLineFile = builder.baseLineFile;
         this.warnIfWrongTestGranularity = builder.warnIfWrongTestGranularity;
         this.createBaseLine = builder.createBaseline;
+        this.uploadResults = builder.uploadResults;
+        this.uploadUrl = builder.uploadUrl;
+        this.apiKey = builder.apiKey;
     }
 
     public File getResultsFolder() {
@@ -35,6 +43,18 @@ public class GaugeConfig {
         return createBaseLine;
     }
 
+    public URL getUploadUrl() {
+        return uploadUrl;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public boolean isUploadResults() {
+        return uploadResults;
+    }
+
     /**
      * Builder for fluent construction of a GaugeConfig object.
      */
@@ -43,9 +63,11 @@ public class GaugeConfig {
         private File baseLineFile = null;
         private boolean warnIfWrongTestGranularity = false;
         private boolean createBaseline = false;
+        private boolean uploadResults = false;
+        private String apiKey = null;
+        private URL uploadUrl = getUrl("https://microbenchmarks.appspot.com/");
 
         public Builder() {
-
         }
 
         /**
@@ -99,9 +121,32 @@ public class GaugeConfig {
             return this;
         }
 
+        public Builder uploadResults() {
+            uploadResults = true;
+            return this;
+        }
+
+        public Builder uploadUrl(String url) {
+            this.uploadUrl = getUrl(url);
+            return this;
+        }
+
+        public Builder apiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
+        }
+
         private void checkNotNull(Object obj, String errorMessage) {
             if (obj == null) {
                 throw new IllegalArgumentException(errorMessage);
+            }
+        }
+
+        private URL getUrl(String url) {
+            try {
+                return new URL(url);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
             }
         }
     }

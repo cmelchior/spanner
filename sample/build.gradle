@@ -20,6 +20,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "CALIPER_API_KEY", "\"${System.getenv('CALIPER_API_KEY')}\""
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

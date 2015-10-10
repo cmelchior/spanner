@@ -85,12 +85,10 @@ public final class GaugeConfiguration {
     }
 
     private static ImmutableMap<Class<? extends ResultProcessor>, ResultProcessorConfig>
-    findResultProcessorConfigs(ImmutableMap<String, String> resultsProperties)
-            throws InvalidConfigurationException {
+    findResultProcessorConfigs(ImmutableMap<String, String> resultsProperties) throws InvalidConfigurationException {
         ImmutableBiMap<String, Class<? extends ResultProcessor>> processorToClass =
                 mapGroupNamesToClasses(resultsProperties, ResultProcessor.class);
-        ImmutableMap.Builder<Class<? extends ResultProcessor>, ResultProcessorConfig> builder =
-                ImmutableMap.builder();
+        ImmutableMap.Builder<Class<? extends ResultProcessor>, ResultProcessorConfig> builder = ImmutableMap.builder();
         for (Entry<String, Class<? extends ResultProcessor>> entry : processorToClass.entrySet()) {
             builder.put(entry.getValue(), getResultProcessorConfig(resultsProperties, entry.getKey()));
         }
@@ -163,8 +161,7 @@ public final class GaugeConfiguration {
         return resultProcessorConfigs.keySet();
     }
 
-    public ResultProcessorConfig getResultProcessorConfig(
-            Class<? extends ResultProcessor> resultProcessorClass) {
+    public ResultProcessorConfig getResultProcessorConfig(Class<? extends ResultProcessor> resultProcessorClass) {
         return resultProcessorConfigs.get(resultProcessorClass);
     }
 
