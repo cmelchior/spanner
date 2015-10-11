@@ -22,11 +22,13 @@ import static com.google.common.base.Throwables.propagateIfInstanceOf;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.sun.jersey.api.client.async.TypeListener;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +45,8 @@ import dk.ilios.gauge.exception.InvalidCommandException;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.exception.SkipThisScenarioException;
 import dk.ilios.gauge.exception.UserCodeException;
+import dk.ilios.gauge.util.Parser;
+import dk.ilios.gauge.util.Parsers;
 import dk.ilios.gauge.util.Reflection;
 
 /**
@@ -107,7 +111,7 @@ public final class BenchmarkClass {
         }
 
         // Initialize benchmark parameters
-        this.userParameters = ParameterSet.create(benchmarkClass, Param.class);
+        this.userParameters = ParameterSet.create(classReference, Param.class);
     }
 
     private void validateBenchmarkMethods(List<Method> methods) throws InvalidBenchmarkException {

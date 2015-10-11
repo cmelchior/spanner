@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,10 +29,13 @@ public class AndroidExperimentSelector implements ExperimentSelector {
 
     private final ImmutableSet<Instrument> instruments;
     private final BenchmarkClass benchmarkClass;
+    private final ImmutableSetMultimap<String, String> userParameters;
 
-    public AndroidExperimentSelector(BenchmarkClass benchmarkClass, ImmutableSet<Instrument> instruments) {
+    public AndroidExperimentSelector(BenchmarkClass benchmarkClass,
+                                     ImmutableSet<Instrument> instruments) {
         this.instruments = instruments;
         this.benchmarkClass = benchmarkClass;
+        this.userParameters = benchmarkClass.userParameters().fillInDefaultsFor(ImmutableSetMultimap.<String, String>of());
     }
 
     @Override
@@ -56,16 +61,15 @@ public class AndroidExperimentSelector implements ExperimentSelector {
     @Override
     public ImmutableSet<Experiment> selectExperiments() {
         try {
-            Map<String, String> userParameters = new HashMap<>(); // TODO Wonder what should go here?
-//            userParameters.put(CommonInstrumentOptions.MEASUREMENTS.getKey(), "9");
-//            userParameters.put(CommonInstrumentOptions.WARMUP.getKey(), "true");
-//            userParameters.put(CommonInstrumentOptions.MAX_WARMUP_WALL_TIME.getKey(), "10m");
-
+            // Create all combinations
             List<Experiment> experiments = new ArrayList<>();
-            for (Instrument instrument : instruments) {
-                for (Method method : benchmarkClass.getMethods()) {
-                    Instrument.Instrumentation instrumentation = instrument.createInstrumentation(method);
-                    experiments.add(new Experiment(instrumentation, userParameters));
+            for (Instrument instrument : instruments) { // of instruments
+                for (Method method : benchmarkClass.getMethods()) { // of methods
+                    for (List<String> userParamsChoice : cartesian(userParameters)) { // of parameters
+                        ImmutableMap<String, String> experimentBenchmarkParameters = zip(userParameters.keySet(), userParamsChoice);
+                        Instrument.Instrumentation instrumentation = instrument.createInstrumentation(method);
+                        experiments.add(new Experiment(instrumentation, experimentBenchmarkParameters ));
+                    }
                 }
             }
             return ImmutableSet.copyOf(experiments);
@@ -79,7 +83,7 @@ public class AndroidExperimentSelector implements ExperimentSelector {
         return null;
     }
 
-    protected static <K, V> ImmutableMap<K, V> zip(Set<K> keys, Collection<V> values) {
+    private static <K, V> ImmutableMap<K, V> zip(Set<K> keys, Collection<V> values) {
         ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
 
         Iterator<K> keyIterator = keys.iterator();
@@ -95,4 +99,9 @@ public class AndroidExperimentSelector implements ExperimentSelector {
         return builder.build();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T> Set<List<T>> cartesian(SetMultimap<String, T> multimap) {
+        ImmutableMap<String, Set<T>> paramsAsMap = (ImmutableMap) multimap.asMap();
+        return Sets.cartesianProduct(paramsAsMap.values().asList());
+    }
 }

@@ -70,7 +70,6 @@ final class BenchmarkClass {
     // maybe signal this better?
 
     this.userParameters = ParameterSet.create(theClass, Param.class);
-
     this.benchmarkFlags = getVmOptions(theClass);
   }
 

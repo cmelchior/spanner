@@ -22,6 +22,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -43,8 +44,13 @@ public class MacrobenchmarkWorker extends Worker {
     private final ImmutableSet<Method> afterRepMethods;
     private final boolean gcBeforeEach;
 
-    public MacrobenchmarkWorker(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
-        super(benchmarkClass.getInstance(), method);
+    public MacrobenchmarkWorker(BenchmarkClass benchmarkClass,
+                                Method method,
+                                Ticker ticker,
+                                Map<String, String> workerOptions,
+                                ImmutableSortedMap<String, String> userParameters) {
+
+        super(benchmarkClass.getInstance(), method, userParameters);
         this.stopwatch = Stopwatch.createUnstarted(ticker);
         this.beforeRepMethods = getAnnotatedMethods(benchmark.getClass(), BeforeRep.class);
         this.afterRepMethods = getAnnotatedMethods(benchmark.getClass(), AfterRep.class);

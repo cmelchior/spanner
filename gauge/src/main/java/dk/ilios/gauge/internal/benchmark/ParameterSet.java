@@ -31,64 +31,74 @@ import java.util.Set;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 
 /**
- * Represents all the injectable parameter fields of a single kind (@Param or @VmParam) found in a
+ * Represents all the injectable parameter fields of a single kind (@Param) found in a
  * benchmark class. Has nothing to do with particular choices of <i>values</i> for these parameters
  * (except that it knows how to find the <i>default</i> values).
  */
 public final class ParameterSet {
-  public static ParameterSet create(Class<?> theClass, Class<? extends Annotation> annotationClass)
-      throws InvalidBenchmarkException {
-    // deterministic order, not reflection order
-    ImmutableMap.Builder<String, Parameter> parametersBuilder =
-        ImmutableSortedMap.naturalOrder();
 
-    for (Field field : theClass.getDeclaredFields()) {
-      if (field.isAnnotationPresent(annotationClass)) {
-        Parameter parameter = Parameter.create(field);
-        parametersBuilder.put(field.getName(), parameter);
-      }
+    /**
+     * Returns the set of all parameters and their possible values.
+     * @param benchmarkClass    Benchmark class.
+     * @param annotationClass   Annotation specifying a parameter.
+     * @return
+     * @throws InvalidBenchmarkException
+     */
+    public static ParameterSet create(Class<?> benchmarkClass, Class<? extends Annotation> annotationClass) throws InvalidBenchmarkException {
+        // deterministic order, not reflection order
+        ImmutableMap.Builder<String, Parameter> parametersBuilder =
+                ImmutableSortedMap.naturalOrder();
+
+        for (Field field : benchmarkClass.getDeclaredFields()) {
+            if (field.isAnnotationPresent(annotationClass)) {
+                Parameter parameter = Parameter.create(field);
+                parametersBuilder.put(field.getName(), parameter);
+            }
+        }
+        return new ParameterSet(parametersBuilder.build());
     }
-    return new ParameterSet(parametersBuilder.build());
-  }
 
-  final ImmutableMap<String, Parameter> map;
+    final ImmutableMap<String, Parameter> map;
 
-  private ParameterSet(ImmutableMap<String, Parameter> map) {
-    this.map = map;
-  }
-
-  public Set<String> names() {
-    return map.keySet();
-  }
-
-  public Parameter get(String name) {
-    return map.get(name);
-  }
-
-  public ImmutableSetMultimap<String, String> fillInDefaultsFor(
-      ImmutableSetMultimap<String, String> explicitValues) throws InvalidBenchmarkException {
-    ImmutableSetMultimap.Builder<String, String> combined = ImmutableSetMultimap.builder();
-
-    // For user parameters, this'll actually be the same as fromClass.keySet(), since any extras
-    // given at the command line are treated as errors; for VM parameters this is not the case.
-    for (String name : Sets.union(map.keySet(), explicitValues.keySet())) {
-      Parameter parameter = map.get(name);
-      ImmutableCollection<String> values = explicitValues.containsKey(name)
-          ? explicitValues.get(name)
-          : parameter.defaults();
-
-      combined.putAll(name, values);
-      if (values.isEmpty()) {
-        throw new InvalidBenchmarkException("ERROR: No default value provided for " + name);
-      }
+    private ParameterSet(ImmutableMap<String, Parameter> map) {
+        this.map = map;
     }
-    return combined.orderKeysBy(Ordering.natural()).build();
-  }
 
-  public void injectAll(Object benchmark, Map<String, String> actualValues) {
-    for (Parameter parameter : map.values()) {
-      String value = actualValues.get(parameter.name());
-      parameter.inject(benchmark, value);
+    public Set<String> names() {
+        return map.keySet();
     }
-  }
+
+    public Parameter get(String name) {
+        return map.get(name);
+    }
+
+    /**
+     * Create the combined set of Parameters set in code in the benchmark class and any potential overrides.
+     * NOTE: Overrides not used currently. Legacy from Caliper where commandline params took precedence.
+     */
+    public ImmutableSetMultimap<String, String> fillInDefaultsFor(ImmutableSetMultimap<String, String> explicitValues) {
+        ImmutableSetMultimap.Builder<String, String> combined = ImmutableSetMultimap.builder();
+
+        // For user parameters, this'll actually be the same as fromClass.keySet(), since any extras
+        // given at the command line are treated as errors; for VM parameters this is not the case.
+        for (String name : Sets.union(map.keySet(), explicitValues.keySet())) {
+            Parameter parameter = map.get(name);
+            ImmutableCollection<String> values = explicitValues.containsKey(name)
+                    ? explicitValues.get(name)
+                    : parameter.defaults();
+
+            combined.putAll(name, values);
+            if (values.isEmpty()) {
+                throw new IllegalArgumentException("ERROR: No default value provided for " + name);
+            }
+        }
+        return combined.orderKeysBy(Ordering.natural()).build();
+    }
+
+    public void injectAll(Object benchmark, Map<String, String> actualValues) {
+        for (Parameter parameter : map.values()) {
+            String value = actualValues.get(parameter.name());
+            parameter.inject(benchmark, value);
+        }
+    }
 }

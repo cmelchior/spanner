@@ -21,6 +21,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -49,24 +50,17 @@ public abstract class RuntimeWorker extends Worker {
     private long nextReps;
 
 
-    public RuntimeWorker(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
-        super(benchmarkClass.getInstance(), method);
+    public RuntimeWorker(BenchmarkClass benchmarkClass,
+                         Method method,
+                         Ticker ticker,
+                         Map<String, String> workerOptions,
+                         ImmutableSortedMap<String, String> userParameters) {
+        super(benchmarkClass.getInstance(), method, userParameters);
         this.random = new Random();
         // TODO(gak): investigate whether or not we can use Stopwatch
         this.ticker = ticker;
         this.options = new Options(workerOptions);
     }
-
-
-//    RuntimeWorker(Object benchmark,
-//                  Method method, Random random, Ticker ticker,
-//                  Map<String, String> workerOptions) {
-//        super(benchmark, method);
-//        this.random = random;
-//        // TODO(gak): investigate whether or not we can use Stopwatch
-//        this.ticker = ticker;
-//        this.options = new Options(workerOptions);
-//    }
 
     @Override
     public void bootstrap() throws Exception {
@@ -114,11 +108,13 @@ public abstract class RuntimeWorker extends Worker {
      */
     public static final class Micro extends RuntimeWorker {
 
-        public Micro(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
-            super(benchmarkClass, method, ticker, workerOptions);
+        public Micro(BenchmarkClass benchmarkClass,
+                     Method method,
+                     Ticker ticker,
+                     Map<String, String> workerOptions,
+                     ImmutableSortedMap<String, String> userParameters) {
+            super(benchmarkClass, method, ticker, workerOptions, userParameters);
         }
-//        Micro(Object benchmark, Method method, Random random, Ticker ticker, Map<String, String> workerOptions) {
-//        }
 
         @Override
         long invokeTimeMethod(long reps) throws Exception {
@@ -142,16 +138,13 @@ public abstract class RuntimeWorker extends Worker {
      */
     public static final class Pico extends RuntimeWorker {
 
-        public Pico(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
-            super(benchmarkClass, method, ticker, workerOptions);
+        public Pico(BenchmarkClass benchmarkClass,
+                    Method method,
+                    Ticker ticker,
+                    Map<String, String> workerOptions,
+                    ImmutableSortedMap<String, String> userParameters) {
+            super(benchmarkClass, method, ticker, workerOptions, userParameters);
         }
-//
-//
-//        Pico(Object benchmark,
-//             Method method, Random random, Ticker ticker,
-//             Map<String, String> workerOptions) {
-//            super(benchmark, method, random, ticker, workerOptions);
-//        }
 
         @Override
         long invokeTimeMethod(long reps) throws Exception {

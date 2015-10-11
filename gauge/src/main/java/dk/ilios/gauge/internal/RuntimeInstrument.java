@@ -202,8 +202,7 @@ public class RuntimeInstrument extends Instrument {
                     TIMING_INTERVAL_OPTION + "Nanos", toNanosString(TIMING_INTERVAL_OPTION),
                     CommonInstrumentOptions.GC_BEFORE_EACH.getKey(), "true"
             );
-//
-//
+
 //            return ImmutableMap.of(
 //                    TIMING_INTERVAL_OPTION + "Nanos", toNanosString(TIMING_INTERVAL_OPTION),
 //                    CommonInstrumentOptions.GC_BEFORE_EACH.getKey(), options.get(CommonInstrumentOptions.GC_BEFORE_EACH.getKey())

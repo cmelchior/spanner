@@ -31,18 +31,19 @@ import dk.ilios.gauge.util.Parsers;
 import dk.ilios.gauge.util.Util;
 
 /**
- * Represents an injectable parameter, marked with one of @Param, @VmParam. Has nothing to do with
+ * Represents an injectable parameter, marked with @Param. Has nothing to do with
  * particular choices of <i>values</i> for this parameter (except that it knows how to find the
  * <i>default</i> values).
  */
 public final class Parameter {
-    public static Parameter create(Field field) throws InvalidBenchmarkException {
-        return new Parameter(field);
-    }
 
     private final Field field;
     private final Parser<?> parser;
     private final ImmutableList<String> defaults;
+
+    public static Parameter create(Field field) throws InvalidBenchmarkException {
+        return new Parameter(field);
+    }
 
     public Parameter(Field field) throws InvalidBenchmarkException {
         if (Util.isStatic(field)) {

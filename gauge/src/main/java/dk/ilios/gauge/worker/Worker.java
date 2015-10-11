@@ -16,12 +16,20 @@
 package dk.ilios.gauge.worker;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
+import com.sun.jersey.api.client.async.TypeListener;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 
 import dk.ilios.gauge.AfterExperiment;
 import dk.ilios.gauge.BeforeExperiment;
+import dk.ilios.gauge.Param;
 import dk.ilios.gauge.model.Measurement;
+import dk.ilios.gauge.model.Run;
+import dk.ilios.gauge.util.Parser;
+import dk.ilios.gauge.util.Parsers;
 import dk.ilios.gauge.util.Reflection;
 
 /**
@@ -29,23 +37,49 @@ import dk.ilios.gauge.util.Reflection;
  */
 public abstract class Worker {
 
+    private final ImmutableSortedMap<String, String> userParameters;
     private ImmutableSet<Method> beforeExperimentMethods;
     private ImmutableSet<Method> afterExperimentMethods;
 
     protected final Method benchmarkMethod;
     protected final Object benchmark;
 
-    protected Worker(Object benchmark, Method method) {
+    protected Worker(Object benchmark, Method method, ImmutableSortedMap<String, String> userParameters) {
         this.benchmark = benchmark;
         this.benchmarkMethod = method;
         this.beforeExperimentMethods = Reflection.getAnnotatedMethods(benchmark.getClass(), BeforeExperiment.class);
         this.afterExperimentMethods = Reflection.getAnnotatedMethods(benchmark.getClass(), AfterExperiment.class);
+        this.userParameters = userParameters;
+    }
+
+    /**
+     * Injects any configured parameters into the class.
+     */
+    private void injectParams() {
+        for (Field field : benchmark.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Param.class)) {
+                String fieldName = field.getName();
+                String value = userParameters.get(fieldName);
+                field.setAccessible(true);
+                try {
+                    Parser<?> parser = Parsers.conventionalParser(field.getType());
+                    field.set(benchmark, parser.parse(value));
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     /**
      * Initializes the benchmark object.
      */
     public final void setUpBenchmark() throws Exception {
+        injectParams();
         for (Method method : beforeExperimentMethods) {
             method.invoke(benchmark);
         }

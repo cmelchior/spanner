@@ -17,6 +17,7 @@
 package dk.ilios.gauge.worker;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -36,9 +37,10 @@ public final class CustomMeasurementWorker extends Worker {
     private final String description;
 
     public CustomMeasurementWorker(Object benchmarkClassInstance,
-            Method benchmarkMethod,
-            Map<String, String> workerOptions) {
-        super(benchmarkClassInstance, benchmarkMethod);
+                                   Method benchmarkMethod,
+                                   Map<String, String> workerOptions,
+                                   ImmutableSortedMap<String, String> userParameters) {
+        super(benchmarkClassInstance, benchmarkMethod, userParameters);
         this.options = new Options(workerOptions);
         CustomMeasurement annotation = benchmarkMethod.getAnnotation(CustomMeasurement.class);
         this.unit = annotation.units();

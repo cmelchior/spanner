@@ -76,7 +76,8 @@ public class AndroidUnitTestTrial implements Callable<Trial.Result> {
                 benchmark,
                 trial.experiment().instrumentation().benchmarkMethod(),
                 Ticker.systemTicker(),
-                trial.experiment().instrumentation().workerOptions()
+                trial.experiment().instrumentation().workerOptions(),
+                trial.experiment().userParameters()
         );
 
         worker.setUpBenchmark();

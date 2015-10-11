@@ -160,18 +160,17 @@ public final class ExperimentingGaugeRun implements GaugeRun {
 
         // always dry run first.
         ImmutableSet<Experiment> experimentsToRun = dryRun(allExperiments);
-        if (experimentsToRun.size() != allExperiments.size()) {
-            stdout.format("%d experiments were skipped.%n",
-                    allExperiments.size() - experimentsToRun.size());
-        }
+//        if (experimentsToRun.size() != allExperiments.size()) {
+//            stdout.format("%d experiments were skipped.%n", allExperiments.size() - experimentsToRun.size());
+//        }
 
-        if (experimentsToRun.isEmpty()) {
-            throw new InvalidBenchmarkException("All experiments were skipped.");
-        }
-
-        if (options.dryRun()) {
-            return;
-        }
+//        if (experimentsToRun.isEmpty()) {
+//            throw new InvalidBenchmarkException("All experiments were skipped.");
+//        }
+//
+//        if (options.dryRun()) {
+//            return;
+//        }
 
         stdout.flush();
 
@@ -312,15 +311,15 @@ public final class ExperimentingGaugeRun implements GaugeRun {
             try {
                 BenchmarkClass benchmarkClass = selector.benchmarkClass();
                 Object benchmarkInstance = selector.benchmarkClass().getInstance();
-                benchmarkClass.setUpBenchmark(benchmarkInstance);
+//                benchmarkClass.setUpBenchmark(benchmarkInstance);
                 try {
-                    experiment.instrumentation().dryRun(benchmarkInstance);
+//                    experiment.instrumentation().dryRun(benchmarkInstance);
                     builder.add(experiment);
                 } finally {
                     // discard 'benchmark' now; the worker will have to instantiate its own anyway
-                    benchmarkClass.cleanup(benchmarkInstance);
+//                    benchmarkClass.cleanup(benchmarkInstance);
                 }
-            } catch (SkipThisScenarioException innocuous) {
+            } catch (SkipThisScenarioException ignoreScenario) {
             }
         }
         return builder.build();

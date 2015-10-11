@@ -27,8 +27,7 @@ import java.lang.annotation.Target;
  * field to each instance it creates. These values come from
  *
  * <ul>
- * <li>The command line, if specified using {@code -Dname=value1,value2,value3}
- * <li>Otherwise, the {@link #value()} list given in the annotation
+ * <li>The {@link #value()} list given in the annotation
  * <li>Otherwise, if the parameter type is either {@code boolean} or an {@code enum} type, Caliper
  *     assumes you want all possible values.
  * <li>Finally, if none of the above match, Caliper will display an error and exit.
@@ -47,9 +46,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Param {
   /**
-   * One or more default values, as strings, that this parameter should be given if none are
-   * specified on the command line. If values are specified on the command line, the defaults given
-   * here are all ignored.
+   * One or more default values, as strings, that this parameter should be given.
    */
   String[] value() default {};
 }
