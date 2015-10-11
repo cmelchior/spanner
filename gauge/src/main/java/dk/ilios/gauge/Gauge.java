@@ -14,7 +14,10 @@ import org.threeten.bp.Instant;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -37,6 +40,7 @@ import dk.ilios.gauge.json.InstantTypeAdapter;
 import dk.ilios.gauge.log.AndroidStdOut;
 import dk.ilios.gauge.log.StdOut;
 import dk.ilios.gauge.model.Run;
+import dk.ilios.gauge.model.Trial;
 import dk.ilios.gauge.options.GaugeOptions;
 import dk.ilios.gauge.options.CommandLineOptions;
 import dk.ilios.gauge.output.OutputFileDumper;
@@ -52,24 +56,43 @@ public class Gauge {
 
     private static final String RUNNER_MAX_PARALLELISM_OPTION = "runner.maxParallelism";
 
-    private final Class<?> benchmarkClass;
-    private final Method method;
+    private final BenchmarkClass benchmarkClass;
+    private final Callback callback;
     private GaugeConfig benchmarkConfig;
 
-    public static void runBenchmark(Class benchmarkClass, Method method) {
-        new Gauge(benchmarkClass, method).start();
+    public static void runBenchmark(Class benchmarkClass, Method method) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass, method), null).start();
     }
 
-    private Gauge(Class benchmarkClass, Method method) {
+    public static void runBenchmark(Class benchmarkClass, Method method, Callback callback) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass, Arrays.asList(method)), callback).start();
+    }
+
+    public static void runBenchmarks(Class benchmarkClass, ArrayList<Method> methods) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass, methods), null).start();
+    }
+
+    public static void runBenchmarks(Class benchmarkClass, List<Method> methods, Callback callback) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass, methods), callback).start();
+    }
+
+    public static void runAllBenchmarks(Class benchmarkClass) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass), null).start();
+    }
+
+    public static void runAllBenchmarks(Class benchmarkClass, Callback callback) throws InvalidBenchmarkException {
+        new Gauge(new BenchmarkClass(benchmarkClass), callback).start();
+    }
+
+    private Gauge(BenchmarkClass benchmarkClass, Callback callback) {
         this.benchmarkClass = benchmarkClass;
-        this.method = method;
+        this.callback = callback;
     }
 
     public void start() {
         try {
 
-            BenchmarkClass benchmarkClassWrapper = new BenchmarkClass(benchmarkClass, method);
-            benchmarkConfig = benchmarkClassWrapper.getConfiguration();
+            benchmarkConfig = benchmarkClass.getConfiguration();
 
             // Setup components needed by the Runner
             GaugeOptions options = CommandLineOptions.parse(new String[]{benchmarkClass.getCanonicalName()});
@@ -89,15 +112,14 @@ public class Gauge {
                     .options(options)
                     .build();
 
-            ExperimentSelector experimentSelector = new AndroidExperimentSelector(benchmarkClassWrapper, method, instruments);
+            ExperimentSelector experimentSelector = new AndroidExperimentSelector(benchmarkClass, instruments);
 
             GsonBuilder gsonBuilder = new GsonBuilder().setExclusionStrategies(new AnnotationExclusionStrategy());
             gsonBuilder.registerTypeAdapterFactory(TypeAdapters.newFactory(Instant.class, new InstantTypeAdapter()));
             Gson gson = gsonBuilder.create();
 
-
             Set<ResultProcessor> processors = new HashSet<>();
-            OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClassWrapper, gson, benchmarkConfig);
+            OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClass, gson, benchmarkConfig);
             processors.add(dumper);
             if (benchmarkConfig.isUploadResults()) {
                 HttpUploader uploader = new HttpUploader(stdOut, gson, benchmarkConfig);
@@ -114,7 +136,8 @@ public class Gauge {
                     instruments,
                     resultProcessors,
                     experimentSelector,
-                    executor
+                    executor,
+                    callback
             );
 
             // Run benchmark
@@ -173,5 +196,15 @@ public class Gauge {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * Callback for outside listeners to get notified on the progress of the Benchmarks running.
+     */
+    public interface Callback {
+        void trialStarted(Trial trial);
+        void trialSuccess(Trial trial, Trial.Result result);
+        void trialFailure(Trial trial, Throwable error);
+        void trialEnded(Trial trial);
     }
 }

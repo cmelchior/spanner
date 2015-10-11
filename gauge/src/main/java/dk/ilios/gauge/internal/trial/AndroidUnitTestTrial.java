@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
+import dk.ilios.gauge.Gauge;
 import dk.ilios.gauge.bridge.ShouldContinueMessage;
 import dk.ilios.gauge.bridge.StartMeasurementLogMessage;
 import dk.ilios.gauge.bridge.StopMeasurementLogMessage;
@@ -34,78 +35,55 @@ public class AndroidUnitTestTrial implements Callable<Trial.Result> {
     private final TrialOutputLogger trialOutput;
     private final Stopwatch trialStopwatch = Stopwatch.createUnstarted();
     private final BenchmarkClass benchmark;
+    private final Gauge.Callback callback;
 
     public AndroidUnitTestTrial(
             Trial trial,
             BenchmarkClass benchmarkClass,
             MeasurementCollectingVisitor measurementCollectingVisitor,
             GaugeOptions options,
-            TrialOutputLogger trialOutput) {
+            TrialOutputLogger trialOutput,
+            Gauge.Callback callback
+    ) {
         this.trial = trial;
         this.options = options;
         this.measurementCollectingVisitor = measurementCollectingVisitor;
         this.trialOutput = trialOutput;
         this.benchmark = benchmarkClass;
+        this.callback = callback;
     }
 
     // TODO Timeout not possible when running on the same thread
     // TODO Error checking has been removed. Any crash in benchmark code will crash everything.
     @Override
     public Trial.Result call() throws Exception {
+        callback.trialStarted(trial);
+        Trial.Result result = null;
+        try {
+            result = getResult();
+            callback.trialSuccess(trial, result);
+        } catch (Throwable e) {
+            callback.trialFailure(trial, e);
+            throw e;
+        } finally {
+            callback.trialEnded(trial);
+        }
+        return result;
+    }
 
-
-//        public MacrobenchmarkWorker(Object benchmark, Method method, Ticker ticker, Map<String, String> workerOptions) {
-//            super(benchmark, method);
-//            this.stopwatch = Stopwatch.createUnstarted(ticker);
-//            this.beforeRepMethods = getAnnotatedMethods(benchmark.getClass(), BeforeRep.class);
-//            this.afterRepMethods = getAnnotatedMethods(benchmark.getClass(), AfterRep.class);
-//            this.gcBeforeEach = Boolean.parseBoolean(workerOptions.get("gcBeforeEach"));
-//        }
-
+    private Trial.Result getResult() throws Exception {
         Worker worker = (Worker) trial.experiment().instrumentation().workerClass().getDeclaredConstructors()[0].newInstance(
                 benchmark,
+                trial.experiment().instrumentation().benchmarkMethod(),
                 Ticker.systemTicker(),
                 trial.experiment().instrumentation().workerOptions()
         );
 
-//        log.notifyWorkerStarted(request.trialId);
-//        try {
-//            worker.setUpBenchmark();
-//            log.notifyBootstrapPhaseStarting();
-//            worker.bootstrap();
-//            log.notifyMeasurementPhaseStarting();
-//            boolean keepMeasuring = true;
-//            boolean isInWarmup = true;
-//            while (keepMeasuring) {
-//                worker.preMeasure(isInWarmup);
-//                log.notifyMeasurementStarting();
-//                try {
-//                    ShouldContinueMessage message = log.notifyMeasurementEnding(worker.measure());
-//                    keepMeasuring = message.shouldContinue();
-//                    isInWarmup = !message.isWarmupComplete();
-//                } finally {
-//                    worker.postMeasure();
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.notifyFailure(e);
-//        } finally {
-//            System.out.flush(); // ?
-//            worker.tearDownBenchmark();
-//            log.close();
-//        }
-
-
-//        log.notifyWorkerStarted(request.trialId); // StartupAnnounceMessage
         worker.setUpBenchmark();
-//        log.notifyBootstrapPhaseStarting(); // String
         worker.bootstrap();
-//        log.notifyMeasurementPhaseStarting(); // String
-
         boolean keepMeasuring = true;
         boolean isInWarmup = true;
         boolean doneCollecting = false;
-
         StopMeasurementLogMessage stopMessage = new StopMeasurementLogMessage(Collections.EMPTY_LIST);
         ShouldContinueMessage continueMessage = new ShouldContinueMessage();
         while (keepMeasuring) {

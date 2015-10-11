@@ -43,8 +43,8 @@ public class MacrobenchmarkWorker extends Worker {
     private final ImmutableSet<Method> afterRepMethods;
     private final boolean gcBeforeEach;
 
-    public MacrobenchmarkWorker(BenchmarkClass benchmarkClass, Ticker ticker, Map<String, String> workerOptions) {
-        super(benchmarkClass.getInstance(), benchmarkClass.getMethod());
+    public MacrobenchmarkWorker(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
+        super(benchmarkClass.getInstance(), method);
         this.stopwatch = Stopwatch.createUnstarted(ticker);
         this.beforeRepMethods = getAnnotatedMethods(benchmark.getClass(), BeforeRep.class);
         this.afterRepMethods = getAnnotatedMethods(benchmark.getClass(), AfterRep.class);

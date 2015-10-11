@@ -49,8 +49,8 @@ public abstract class RuntimeWorker extends Worker {
     private long nextReps;
 
 
-    public RuntimeWorker(BenchmarkClass benchmarkClass, Ticker ticker, Map<String, String> workerOptions) {
-        super(benchmarkClass.getInstance(), benchmarkClass.getMethod());
+    public RuntimeWorker(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
+        super(benchmarkClass.getInstance(), method);
         this.random = new Random();
         // TODO(gak): investigate whether or not we can use Stopwatch
         this.ticker = ticker;
@@ -114,8 +114,8 @@ public abstract class RuntimeWorker extends Worker {
      */
     public static final class Micro extends RuntimeWorker {
 
-        public Micro(BenchmarkClass benchmarkClass, Ticker ticker, Map<String, String> workerOptions) {
-            super(benchmarkClass, ticker, workerOptions);
+        public Micro(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
+            super(benchmarkClass, method, ticker, workerOptions);
         }
 //        Micro(Object benchmark, Method method, Random random, Ticker ticker, Map<String, String> workerOptions) {
 //        }
@@ -142,8 +142,8 @@ public abstract class RuntimeWorker extends Worker {
      */
     public static final class Pico extends RuntimeWorker {
 
-        public Pico(BenchmarkClass benchmarkClass, Ticker ticker, Map<String, String> workerOptions) {
-            super(benchmarkClass, ticker, workerOptions);
+        public Pico(BenchmarkClass benchmarkClass, Method method, Ticker ticker, Map<String, String> workerOptions) {
+            super(benchmarkClass, method, ticker, workerOptions);
         }
 //
 //

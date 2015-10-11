@@ -1,16 +1,11 @@
 package dk.ilios.gauge;
 
-import android.os.Environment;
-import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 
-import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 import dk.ilios.caliperx.caliperx.test.BuildConfig;
-import dk.ilios.gauge.config.GaugeConfiguration;
-import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
-import dk.ilios.gauge.runner.GaugeRunner;
+import dk.ilios.gauge.junit.GaugeRunner;
 
 //@RunWith(CaliperXRunner.class)
 @RunWith(GaugeRunner.class)

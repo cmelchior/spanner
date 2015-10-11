@@ -19,7 +19,6 @@ package dk.ilios.gauge.internal.benchmark;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagateIfInstanceOf;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -28,15 +27,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dk.ilios.gauge.AfterExperiment;
 import dk.ilios.gauge.BeforeExperiment;
+import dk.ilios.gauge.Benchmark;
 import dk.ilios.gauge.BenchmarkConfiguration;
 import dk.ilios.gauge.GaugeConfig;
 import dk.ilios.gauge.Param;
-import dk.ilios.gauge.api.VmOptions;
 import dk.ilios.gauge.exception.InvalidCommandException;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.exception.SkipThisScenarioException;
@@ -52,13 +54,83 @@ public final class BenchmarkClass {
     private static final Logger logger = Logger.getLogger(BenchmarkClass.class.getName());
     private final Class<?> classReference;
     private final Object classInstance;
-    private final Method method;
+    private final List<Method> benchmarkMethods;
     private final ParameterSet userParameters;
 
-    public BenchmarkClass(Class<?> benchmarkClass, Method method) throws InvalidBenchmarkException {
-        this.classReference = checkNotNull(benchmarkClass);
-        this.method = checkNotNull(method);
+    /**
+     * Creates a wrapper around all benchmark methods in the given class.
+     *
+     * @param benchmarkClass
+     * @throws InvalidBenchmarkException
+     */
+    public BenchmarkClass(Class<?> benchmarkClass) throws InvalidBenchmarkException {
+        this(benchmarkClass, (List) null);
+    }
 
+    /**
+     * Creates a wrapper around the selected benchmark method.
+     *
+     * @param benchmarkClass
+     * @param method
+     * @throws InvalidBenchmarkException If class or method isn't a proper benchmark class/method.
+     */
+    public BenchmarkClass(Class<?> benchmarkClass, Method method) throws InvalidBenchmarkException {
+        this(benchmarkClass, Arrays.asList(method));
+    }
+
+    /**
+     * Creates a wrapper around the selected benchmark methods.
+     *
+     * @param benchmarkClass
+     * @param methods
+     * @throws InvalidBenchmarkException If the class or methods are .
+     */
+    public BenchmarkClass(Class<?> benchmarkClass, List<Method> methods) throws InvalidBenchmarkException {
+
+        // Initialize Benchmark class
+        this.classReference = checkNotNull(benchmarkClass);
+        validateBenchmarkClass(classReference);
+        try {
+            classInstance = benchmarkClass.newInstance();
+        } catch (InstantiationException  e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Initialize benchmark methods
+        if (methods == null) {
+            this.benchmarkMethods = findAllBenchmarkMethods(classReference);
+        } else {
+            validateBenchmarkMethods(methods);
+            this.benchmarkMethods = methods;
+        }
+
+        // Initialize benchmark parameters
+        this.userParameters = ParameterSet.create(benchmarkClass, Param.class);
+    }
+
+    private void validateBenchmarkMethods(List<Method> methods) throws InvalidBenchmarkException {
+        for (Method method : methods) {
+            if (!method.isAnnotationPresent(Benchmark.class)) {
+                throw new InvalidBenchmarkException(String.format("Method %s isn't a benchmark method.",
+                        method.getName()));
+            }
+        }
+    }
+
+    private List<Method> findAllBenchmarkMethods(Class<?> benchmarkClass) {
+        List<Method> benchmarkMethods = new ArrayList<>();
+        for (Method method : benchmarkClass.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(Benchmark.class)) {
+                benchmarkMethods.add(method);
+            }
+
+        }
+        return benchmarkMethods;
+    }
+
+    private void validateBenchmarkClass(Class<?> benchmarkClass) throws InvalidBenchmarkException {
         if (!benchmarkClass.getSuperclass().equals(Object.class)) {
             throw new InvalidBenchmarkException(
                     "%s must not extend any class other than %s. Prefer composition.",
@@ -67,15 +139,6 @@ public final class BenchmarkClass {
 
         if (Modifier.isAbstract(benchmarkClass.getModifiers())) {
             throw new InvalidBenchmarkException("Class '%s' must not be abstract", benchmarkClass);
-        }
-
-        this.userParameters = ParameterSet.create(benchmarkClass, Param.class);
-        try {
-            classInstance = benchmarkClass.newInstance();
-        } catch (InstantiationException  e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -111,13 +174,6 @@ public final class BenchmarkClass {
         return new GaugeConfig.Builder().build();
     }
 
-
-    /**
-     * Returns the method should should be benchmarked.
-     */
-    public Method getMethod() {
-        return method;
-    }
 
     ImmutableSet<Method> beforeExperimentMethods() {
         return Reflection.getAnnotatedMethods(classReference, BeforeExperiment.class);
@@ -228,5 +284,19 @@ public final class BenchmarkClass {
                 throw new InvalidCommandException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Returns the canonical name for the Benchmark class.
+     */
+    public String getCanonicalName() {
+        return classReference.getCanonicalName();
+    }
+
+    /**
+     * Return all benchmark methods in this class.
+     */
+    public List<Method> getMethods() {
+        return benchmarkMethods;
     }
 }

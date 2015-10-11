@@ -25,12 +25,10 @@ import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
  */
 public class AndroidExperimentSelector implements ExperimentSelector {
 
-    private final Method method;
     private final ImmutableSet<Instrument> instruments;
     private final BenchmarkClass benchmarkClass;
 
-    public AndroidExperimentSelector(BenchmarkClass benchmarkClass, Method method, ImmutableSet<Instrument> instruments) {
-        this.method = method;
+    public AndroidExperimentSelector(BenchmarkClass benchmarkClass, ImmutableSet<Instrument> instruments) {
         this.instruments = instruments;
         this.benchmarkClass = benchmarkClass;
     }
@@ -65,8 +63,10 @@ public class AndroidExperimentSelector implements ExperimentSelector {
 
             List<Experiment> experiments = new ArrayList<>();
             for (Instrument instrument : instruments) {
-                Instrument.Instrumentation instrumentation = instrument.createInstrumentation(method);
-                experiments.add(new Experiment(instrumentation, userParameters));
+                for (Method method : benchmarkClass.getMethods()) {
+                    Instrument.Instrumentation instrumentation = instrument.createInstrumentation(method);
+                    experiments.add(new Experiment(instrumentation, userParameters));
+                }
             }
             return ImmutableSet.copyOf(experiments);
         } catch (InvalidBenchmarkException e) {

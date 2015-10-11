@@ -41,6 +41,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import dk.ilios.gauge.Gauge;
 import dk.ilios.gauge.output.ResultProcessor;
 import dk.ilios.gauge.exception.SkipThisScenarioException;
 import dk.ilios.gauge.exception.TrialFailureException;
@@ -82,6 +83,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
     private final ExperimentSelector selector;
     //  private final Provider<ScheduledTrial> scheduledTrial;
     private final ListeningExecutorService executorProvider;
+    private final Gauge.Callback callback;
 
 //  public ExperimentingCaliperRun(
 //      CaliperOptions options,
@@ -109,16 +111,17 @@ public final class ExperimentingGaugeRun implements GaugeRun {
             ImmutableSet<Instrument> instruments,
             ImmutableSet<ResultProcessor> resultProcessors,
             ExperimentSelector selector,
-            ListeningExecutorService executorProvider
+            ListeningExecutorService executorProvider,
+            Gauge.Callback callback
     ) {
         this.options = options;
         this.stdout = stdout;
         this.runInfo= runInfo;
         this.instruments = instruments;
         this.resultProcessors = resultProcessors;
-//        this.scheduledTrial = scheduledTrial;
         this.selector = selector;
         this.executorProvider = executorProvider;
+        this.callback = callback;
     }
 
 
@@ -291,7 +294,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
                         .instrumentSpec(instrumentSpec)
                         .build();
 
-                AndroidUnitTestTrial runLoop = new AndroidUnitTestTrial(trial, selector.benchmarkClass(), measurementsVisitor, options, null);
+                AndroidUnitTestTrial runLoop = new AndroidUnitTestTrial(trial, selector.benchmarkClass(), measurementsVisitor, options, null, callback);
                 ScheduledTrial scheduledTrial = new ScheduledTrial(trial, runLoop, TrialSchedulingPolicy.SERIAL);
                 trials.add(scheduledTrial);
             }

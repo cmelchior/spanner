@@ -86,7 +86,7 @@ public abstract class Instrument {
             return Instrument.this;
         }
 
-        Method benchmarkMethod() {
+        public Method benchmarkMethod() {
             return benchmarkMethod;
         }
 
