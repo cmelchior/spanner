@@ -31,7 +31,7 @@ import dk.ilios.gauge.options.GaugeOptions;
 import dk.ilios.gauge.util.Util;
 
 /**
- * Loads caliper configuration files and, if necessary, creates new versions from the defaults.
+ * Loads Gauge configuration files and, if necessary, creates new versions from the defaults.
  */
 public final class GaugeConfigLoader {
     private final GaugeOptions options;
@@ -41,15 +41,13 @@ public final class GaugeConfigLoader {
     }
 
     public GaugeConfiguration loadOrCreate() throws InvalidConfigurationException {
-        File configFile = options.caliperConfigFile();
+        File configFile = options.gaugeConfigFile();
         ImmutableMap<String, String> defaults;
         try {
             defaults = Util.loadProperties(Util.resourceSupplier(GaugeConfiguration.class, "/global-config.properties"));
         } catch (IOException impossible) {
             throw new AssertionError(impossible);
         }
-
-        // TODO(kevinb): deal with migration issue from old-style .caliperrc
 
         if (configFile.exists()) {
             try {

@@ -123,7 +123,7 @@ public final class TrialOutputFactoryService
         } else {
             // If none is configured then we don't care, just make a temp dir
             // TODO(lukes): it would be nice to use jdk7 java.nio.file.Files.createTempDir() which allows
-            // us to specify a name, but caliper is still on jdk6.
+            // us to specify a name, but Gauge is still on jdk6.
             directory = Files.createTempDir();
             persistFiles = false;
         }

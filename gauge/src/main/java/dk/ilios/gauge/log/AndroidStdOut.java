@@ -5,7 +5,7 @@ package dk.ilios.gauge.log;
  */
 public class AndroidStdOut implements StdOut {
 
-    private String LOG = "CaliperX";
+    private String LOG = "Gauge";
 
     @Override
     public void println(String line) {

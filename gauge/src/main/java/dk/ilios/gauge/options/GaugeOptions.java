@@ -51,7 +51,7 @@ public interface GaugeOptions {
 
     boolean dryRun();
 
-    File caliperDirectory();
+    File gaugeDirectory();
 
-    File caliperConfigFile();
+    File gaugeConfigFile();
 }

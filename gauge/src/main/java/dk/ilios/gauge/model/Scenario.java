@@ -32,7 +32,7 @@ public final class Scenario {
     private int id;
     private Host host;
     private BenchmarkSpec benchmarkSpec;
-    // TODO(gak): include data about caliper itself and the code being benchmarked
+    // TODO(gak): include data about Gauge itself and the code being benchmarked
     private int hash;
 
     private Scenario(Builder builder) {

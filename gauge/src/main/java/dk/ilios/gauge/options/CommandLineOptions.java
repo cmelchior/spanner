@@ -276,19 +276,19 @@ public final class CommandLineOptions implements GaugeOptions {
     }
 
     // --------------------------------------------------------------------------
-    // Location of .caliper
+    // Location of .gauge
     // --------------------------------------------------------------------------
 
-    private File caliperDirectory = new File(System.getProperty("user.home"), ".caliper");
+    private File gaugeDirectory = new File(System.getProperty("user.home"), ".gauge");
 
     @CommandLineParser.Option({"--directory"})
     private void setGaugeDirectory(String path) {
-        caliperDirectory = new File(path);
+        gaugeDirectory = new File(path);
     }
 
     @Override
-    public File caliperDirectory() {
-        return caliperDirectory;
+    public File gaugeDirectory() {
+        return gaugeDirectory;
     }
 
     // --------------------------------------------------------------------------
@@ -303,8 +303,8 @@ public final class CommandLineOptions implements GaugeOptions {
     }
 
     @Override
-    public File caliperConfigFile() {
-        return caliperConfigFile.or(new File(caliperDirectory, "config.properties"));
+    public File gaugeConfigFile() {
+        return caliperConfigFile.or(new File(gaugeDirectory, "config.properties"));
     }
 
 
@@ -367,7 +367,7 @@ public final class CommandLineOptions implements GaugeOptions {
                 .add("trials", this.trialsPerScenario())
                 .add("printConfig", this.printConfiguration())
                 .add("delimiter", this.delimiter)
-                .add("caliperConfigFile", this.caliperConfigFile)
+                .add("gaugeConfigFile", this.caliperConfigFile)
                 .toString();
     }
 

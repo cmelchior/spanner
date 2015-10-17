@@ -31,7 +31,7 @@ import dk.ilios.gauge.model.Trial;
 /**
  * A single "premise" for making benchmark measurements: which class and method to invoke, which VM
  * to use, which choices for user parameters and vmArguments to fill in and which instrument to use
- * to measure. A caliper run will compute all possible scenarios using
+ * to measure. A Gauge run will compute all possible scenarios using
  * FullCartesianExperimentSelector, and will run one or more trials of each.
  */
 public final class Experiment {
