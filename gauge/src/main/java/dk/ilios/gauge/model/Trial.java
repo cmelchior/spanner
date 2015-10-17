@@ -183,6 +183,10 @@ public final class Trial {
         return this.percentile.evaluate(50);
     }
 
+    public boolean hasBaseline() {
+        return experiment.getBaseline() != null;
+    }
+
     /**
      * Returns changes from baseline or {@code null} if no baseline exists.
      * @return Change in percent from baseline.

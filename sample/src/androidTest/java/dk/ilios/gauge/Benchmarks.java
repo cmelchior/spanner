@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 
-import dk.ilios.caliperx.caliperx.test.BuildConfig;
 import dk.ilios.gauge.config.GaugeConfiguration;
+import dk.ilios.gauge.example.BuildConfig;
 import dk.ilios.gauge.junit.GaugeRunner;
 
 @RunWith(GaugeRunner.class)
@@ -18,7 +18,6 @@ public class Benchmarks {
     private File resultsDir = new File(externalDir, "results");
 //    private File baseLineFile = new File(resultstsDir, "baseline.json");
     private File baselineFile = GaugeConfiguration.getLatestJsonFile(resultsDir);
-
 
     @BenchmarkConfiguration
     public GaugeConfig configuration = new GaugeConfig.Builder()

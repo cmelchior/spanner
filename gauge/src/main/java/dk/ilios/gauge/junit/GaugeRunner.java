@@ -120,9 +120,10 @@ public class GaugeRunner extends Runner {
             final Description RUNNING = Description.createTestDescription(testClass.getJavaClass(), "doingStuff");
             runNotifier.fireTestRunStarted(RUNNING);
             runBenchmarks(runNotifier);
-            runNotifier.fireTestRunFinished(null);
         } catch (InvalidBenchmarkException e) {
             throw new RuntimeException(e);
+        } finally {
+            runNotifier.fireTestRunFinished(null);
         }
     }
 
@@ -141,12 +142,13 @@ public class GaugeRunner extends Runner {
                 double resultMedian = getMedian(result.getTrial().measurements());
                 Description spec = getDescription(trial, resultMedian);
                 runNotifier.fireTestStarted(spec);
-
-                double absChange = Math.abs(trial.getChangeFromBaseline());
-                if (absChange > benchmarkConfiguration.getBaselineFailure()) {
-                    runNotifier.fireTestFailure(new Failure(spec,
-                            new TrialFailureException(String.format("Change from baseline was to big: %.2f%%. Limit is %.2f%%",
-                                    absChange, benchmarkConfiguration.getBaselineFailure()))));
+                if (trial.hasBaseline()) {
+                    double absChange = Math.abs(trial.getChangeFromBaseline());
+                    if (absChange > benchmarkConfiguration.getBaselineFailure()) {
+                        runNotifier.fireTestFailure(new Failure(spec,
+                                new TrialFailureException(String.format("Change from baseline was to big: %.2f%%. Limit is %.2f%%",
+                                        absChange, benchmarkConfiguration.getBaselineFailure()))));
+                    }
                 }
                 runNotifier.fireTestFinished(spec);
             }

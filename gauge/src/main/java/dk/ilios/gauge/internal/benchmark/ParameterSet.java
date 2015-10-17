@@ -74,7 +74,7 @@ public final class ParameterSet {
 
     /**
      * Create the combined set of Parameters set in code in the benchmark class and any potential overrides.
-     * NOTE: Overrides not used currently. Legacy from Caliper where commandline params took precedence.
+     * NOTE: Overrides not used currently. Legacy from Gauge where commandline params took precedence.
      */
     public ImmutableSetMultimap<String, String> fillInDefaultsFor(ImmutableSetMultimap<String, String> explicitValues) {
         ImmutableSetMultimap.Builder<String, String> combined = ImmutableSetMultimap.builder();

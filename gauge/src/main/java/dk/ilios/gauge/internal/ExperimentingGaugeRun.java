@@ -81,29 +81,9 @@ public final class ExperimentingGaugeRun implements GaugeRun {
     private final ImmutableSet<Instrument> instruments;
     private final ImmutableSet<ResultProcessor> resultProcessors;
     private final ExperimentSelector selector;
-    //  private final Provider<ScheduledTrial> scheduledTrial;
     private final ListeningExecutorService executorProvider;
     private final Gauge.Callback callback;
     private final Trial[] baselineData;
-
-//  public ExperimentingCaliperRun(
-//      CaliperOptions options,
-//      @Stdout PrintWriter stdout,
-//      BenchmarkClass benchmarkClass,
-//      ImmutableSet<Instrument> instruments,
-//      ImmutableSet<ResultProcessor> resultProcessors,
-//      ExperimentSelector selector,
-//      Provider<ScheduledTrial> scheduledTrial,
-//      Provider<ListeningExecutorService> executorProvider) {
-//    this.options = options;
-//    this.stdout = stdout;
-//    this.benchmarkClass = benchmarkClass;
-//    this.instruments = instruments;
-//    this.resultProcessors = resultProcessors;
-//    this.scheduledTrial = scheduledTrial;
-//    this.selector = selector;
-//    this.executorProvider = executorProvider;
-//  }
 
     public ExperimentingGaugeRun(
             GaugeOptions options,

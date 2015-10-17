@@ -41,10 +41,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 /**
  * {@link ResultProcessor} implementation that uploads the JSON-serialized results to the Caliper
- * webapp.
+ * webapp at https://microbenchmarks.appspot.com/
  */
-abstract class ResultsUploader implements ResultProcessor {
-    private static final Logger logger = Logger.getLogger(ResultsUploader.class.getName());
+abstract class CaliperResultsUploader implements ResultProcessor {
+    private static final Logger logger = Logger.getLogger(CaliperResultsUploader.class.getName());
     private static final String POST_PATH = "/data/trials";
     private static final String RESULTS_PATH_PATTERN = "/runs/%s";
 
@@ -56,7 +56,7 @@ abstract class ResultsUploader implements ResultProcessor {
     private Optional<UUID> runId = Optional.absent();
     private boolean failure = false;
 
-    ResultsUploader(StdOut stdout, Gson gson, Client client, ResultProcessorConfig resultProcessorConfig) throws InvalidConfigurationException {
+    CaliperResultsUploader(StdOut stdout, Gson gson, Client client, ResultProcessorConfig resultProcessorConfig) throws InvalidConfigurationException {
         this.stdout = stdout;
         this.client = client;
         this.gson = gson;

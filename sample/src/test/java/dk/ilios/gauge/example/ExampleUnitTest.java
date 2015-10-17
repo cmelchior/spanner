@@ -1,4 +1,4 @@
-package dk.ilios.gauge.gauge;
+package dk.ilios.gauge.example;
 
 import org.junit.Test;
 

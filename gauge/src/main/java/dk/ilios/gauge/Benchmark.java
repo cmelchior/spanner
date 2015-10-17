@@ -71,7 +71,7 @@ import java.lang.annotation.Target;
  *
  * <p>The benchmark class MyBenchmark has two benchmark methods ({@code foo} and {@code bar}) and
  * two {@link Param Params} ({@code feature} and {@code size}). For each experiment performed by
- * Caliper (e.g. {@code foo} with {@code feature == FeatureEnum.A} and {@code size == 100}),
+ * Gauge (e.g. {@code foo} with {@code feature == FeatureEnum.A} and {@code size == 100}),
  * {@code initializeObject} will be called exactly once, but {@code foo} may be called many times.
  */
 @Target(METHOD)

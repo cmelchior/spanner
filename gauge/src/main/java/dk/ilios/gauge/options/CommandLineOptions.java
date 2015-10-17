@@ -282,7 +282,7 @@ public final class CommandLineOptions implements GaugeOptions {
     private File caliperDirectory = new File(System.getProperty("user.home"), ".caliper");
 
     @CommandLineParser.Option({"--directory"})
-    private void setCaliperDirectory(String path) {
+    private void setGaugeDirectory(String path) {
         caliperDirectory = new File(path);
     }
 

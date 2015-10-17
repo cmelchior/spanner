@@ -29,7 +29,7 @@ import dk.ilios.gauge.log.StdOut;
  * A {@link dk.ilios.gauge.output.ResultProcessor} implementation that publishes results to the webapp using an HTTP
  * request.
  */
-public class HttpUploader extends ResultsUploader {
+public class HttpUploader extends CaliperResultsUploader {
 
     public HttpUploader(StdOut stdout, Gson gson, GaugeConfig config) throws InvalidConfigurationException {
         super(stdout, gson, Client.create(), getConfig(config));

@@ -1,7 +1,5 @@
 package dk.ilios.gauge;
 
-import android.util.ArraySet;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -13,8 +11,8 @@ import org.threeten.bp.Instant;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,7 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import dk.ilios.gauge.config.GaugeConfiguration;
-import dk.ilios.gauge.config.CaliperConfigLoader;
+import dk.ilios.gauge.config.GaugeConfigLoader;
 import dk.ilios.gauge.config.InstrumentConfig;
 import dk.ilios.gauge.config.InvalidConfigurationException;
 import dk.ilios.gauge.exception.InvalidCommandException;
@@ -100,7 +98,7 @@ public class Gauge {
 
             // Setup components needed by the Runner
             GaugeOptions options = CommandLineOptions.parse(new String[]{benchmarkClass.getCanonicalName()});
-            CaliperConfigLoader configLoader = new CaliperConfigLoader(options);
+            GaugeConfigLoader configLoader = new GaugeConfigLoader(options);
             GaugeConfiguration config = configLoader.loadOrCreate();
 
             ImmutableSet<Instrument> instruments = getInstruments(options, config);
@@ -123,12 +121,24 @@ public class Gauge {
             Gson gson = gsonBuilder.create();
 
             Trial[] baselineData;
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(baseline));
-                baselineData = gson.fromJson(br, Trial[].class);
-                br.close();
-            } catch (java.io.IOException e) {
-                throw new RuntimeException(e);
+            if (baseline != null) {
+                BufferedReader br = null;
+                try {
+                    br = new BufferedReader(new FileReader(baseline));
+                    baselineData = gson.fromJson(br, Trial[].class);
+                    br.close();
+                } catch (java.io.IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    if (br != null) {
+                        try {
+                            br.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            } else {
+                baselineData = new Trial[0];
             }
 
             Set<ResultProcessor> processors = new HashSet<>();

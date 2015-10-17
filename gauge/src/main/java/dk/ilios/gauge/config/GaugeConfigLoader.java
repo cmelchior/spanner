@@ -33,10 +33,10 @@ import dk.ilios.gauge.util.Util;
 /**
  * Loads caliper configuration files and, if necessary, creates new versions from the defaults.
  */
-public final class CaliperConfigLoader {
+public final class GaugeConfigLoader {
     private final GaugeOptions options;
 
-    public CaliperConfigLoader(GaugeOptions options) {
+    public GaugeConfigLoader(GaugeOptions options) {
         this.options = options;
     }
 
