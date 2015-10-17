@@ -1,18 +1,30 @@
 package dk.ilios.gauge;
 
+import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 
 import org.junit.runner.RunWith;
 
+import java.io.File;
+
 import dk.ilios.caliperx.caliperx.test.BuildConfig;
+import dk.ilios.gauge.config.GaugeConfiguration;
 import dk.ilios.gauge.junit.GaugeRunner;
 
 @RunWith(GaugeRunner.class)
 public class Benchmarks {
 
+    private File externalDir = InstrumentationRegistry.getTargetContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+    private File resultsDir = new File(externalDir, "results");
+//    private File baseLineFile = new File(resultstsDir, "baseline.json");
+    private File baselineFile = GaugeConfiguration.getLatestJsonFile(resultsDir);
+
+
     @BenchmarkConfiguration
-    GaugeConfig configuration = new GaugeConfig.Builder()
-            .resultsFolder(InstrumentationRegistry.getTargetContext().getFilesDir())
+    public GaugeConfig configuration = new GaugeConfig.Builder()
+            .resultsFolder(externalDir)
+            .baseline(baselineFile)
+            .baselineFailure(15.0)
             .uploadResults()
             .apiKey(BuildConfig.CALIPER_API_KEY)
             .build();

@@ -22,6 +22,11 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSortedMap;
 
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import dk.ilios.gauge.model.BenchmarkSpec;
+import dk.ilios.gauge.model.Trial;
 
 /**
  * A single "premise" for making benchmark measurements: which class and method to invoke, which VM
@@ -30,20 +35,44 @@ import java.util.Map;
  * FullCartesianExperimentSelector, and will run one or more trials of each.
  */
 public final class Experiment {
-    private final Instrument.Instrumentation instrumentation;
-    private final ImmutableSortedMap<String, String> userParameters;
 
-    Experiment(Instrument.Instrumentation instrumentation, Map<String, String> userParameters) {
+    private final Instrument.Instrumentation instrumentation;
+    private final SortedMap<String, String> userParameters;
+    private final BenchmarkSpec benchmarkSpec;
+    private Trial baseline;
+
+    public Experiment(Instrument.Instrumentation instrumentation, Map<String, String> userParameters) {
         this.instrumentation = checkNotNull(instrumentation);
-        this.userParameters = ImmutableSortedMap.copyOf(userParameters);
+        this.userParameters = new TreeMap<>(userParameters);
+        this.benchmarkSpec = new BenchmarkSpec.Builder()
+                .className(instrumentation().benchmarkMethod().getDeclaringClass().getName())
+                .methodName(instrumentation().benchmarkMethod().getName())
+                .addAllParameters(userParameters())
+                .build();
+
+    }
+
+    public void setBaseline(Trial baseline) {
+        this.baseline = baseline;
     }
 
     public Instrument.Instrumentation instrumentation() {
         return instrumentation;
     }
 
-    public ImmutableSortedMap<String, String> userParameters() {
+    public SortedMap<String, String> userParameters() {
         return userParameters;
+    }
+
+    public BenchmarkSpec benchmarkSpec() {
+        return benchmarkSpec;
+    }
+
+    /**
+     * Return the baseline for this experiment.
+     */
+    public Trial getBaseline() {
+        return baseline;
     }
 
     @Override

@@ -24,12 +24,14 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
-import java.lang.reflect.Method;
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.stat.descriptive.rank.Percentile;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import dk.ilios.gauge.internal.Experiment;
 import dk.ilios.gauge.internal.trial.TrialContext;
@@ -37,7 +39,7 @@ import dk.ilios.gauge.json.ExcludeFromJson;
 
 /**
  * An invocation of a single {@link Experiment}.
- *
+ * <p/>
  * Once a trial is completed, call {@link #getResult()} to get the result. From that point, all further modifications
  * to the object Trial object will fail.
  */
@@ -48,11 +50,20 @@ public final class Trial {
     private InstrumentSpec instrumentSpec;
     private Scenario scenario;
     private Experiment experiment;
-    private List<Measurement> measurements = new ArrayList<Measurement>();
+    private List<Measurement> measurements = new ArrayList<>();
     private List<String> messages = new ArrayList<String>();
 
     @ExcludeFromJson
     private boolean trialComplete;
+
+    @ExcludeFromJson
+    private boolean resultsCalculated;
+
+    @ExcludeFromJson
+    private Percentile percentile;
+
+    @ExcludeFromJson
+    private DescriptiveStatistics descriptiveStatistics;
 
     private Trial(Builder builder) {
         this.id = builder.id;
@@ -82,8 +93,8 @@ public final class Trial {
         return experiment;
     }
 
-    public ImmutableList<Measurement> measurements() {
-        return ImmutableList.copyOf(measurements);
+    public List<Measurement> measurements() {
+        return measurements;
     }
 
     public void addMeasurement(Measurement.Builder measurementBuilder) {
@@ -111,9 +122,83 @@ public final class Trial {
         messages.add(message);
     }
 
+    /**
+     * Mark Trial as done and calculate results.
+     */
+    public void calculateResults() {
+        checkResultsCalculated(false);
+
+        double[] weightedValues = new double[measurements.size()];
+        int i = 0;
+        for (Measurement measurement : measurements) {
+            weightedValues[i] = measurement.value().magnitude() / measurement.weight();
+            i++;
+        }
+        percentile = new Percentile();
+        percentile.setData(weightedValues);
+        descriptiveStatistics = new DescriptiveStatistics(weightedValues);
+        if (experiment.getBaseline() != null) {
+            experiment.getBaseline().calculateResults();
+        }
+        resultsCalculated = true;
+    }
+
+    private void checkResultsCalculated(boolean calculated) {
+        if (calculated && !resultsCalculated) {
+            throw new IllegalStateException("Results have not been calculated.");
+        } else if (!calculated && resultsCalculated) {
+            throw new IllegalStateException("Results have already been calculated.");
+        }
+    }
+
+    /**
+     * Returns the results. Will calculate results if not already done
+     */
     public Result getResult() {
         trialComplete = true;
+        calculateResults();
         return new Result(this, experiment, ImmutableList.copyOf(messages));
+    }
+
+    public double getMin() {
+        checkResultsCalculated(true);
+        return descriptiveStatistics.getMin();
+    }
+
+    public double getMax() {
+        checkResultsCalculated(true);
+        return descriptiveStatistics.getMax();
+    }
+
+    /**
+     * @param percentile [0, 100]
+     */
+    public double getPercentile(int percentile) {
+        checkResultsCalculated(true);
+        return this.percentile.evaluate(percentile);
+    }
+
+    public double getMedian() {
+        checkResultsCalculated(true);
+        return this.percentile.evaluate(50);
+    }
+
+    /**
+     * Returns changes from baseline or {@code null} if no baseline exists.
+     * @return Change in percent from baseline.
+     */
+    public Double getChangeFromBaseline() {
+        checkResultsCalculated(true);
+        if (experiment.getBaseline() == null) return null;
+
+        double newMedian = getMedian();
+        double oldMedian = experiment.getBaseline().getMedian();
+
+        return (oldMedian - newMedian) * 100 / oldMedian;
+    }
+
+    public TimeUnit getUnit() {
+        return TimeUnit.NANOSECONDS;
     }
 
     private void checkIsComplete() {
@@ -121,6 +206,13 @@ public final class Trial {
             throw new RuntimeException("Trial is complete. No further modifications are allowed");
         }
     }
+
+    private void checkNotIsComplete() {
+        if (!trialComplete) {
+            throw new RuntimeException("Trial is not complete. Results not yet available");
+        }
+    }
+
 
     @Override
     public boolean equals(Object obj) {

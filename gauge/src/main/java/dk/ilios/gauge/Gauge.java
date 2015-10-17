@@ -11,7 +11,10 @@ import com.google.gson.internal.bind.TypeAdapters;
 
 import org.threeten.bp.Instant;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -93,6 +96,7 @@ public class Gauge {
         try {
 
             benchmarkConfig = benchmarkClass.getConfiguration();
+            File baseline = benchmarkConfig.getBaseLineFile();
 
             // Setup components needed by the Runner
             GaugeOptions options = CommandLineOptions.parse(new String[]{benchmarkClass.getCanonicalName()});
@@ -118,6 +122,15 @@ public class Gauge {
             gsonBuilder.registerTypeAdapterFactory(TypeAdapters.newFactory(Instant.class, new InstantTypeAdapter()));
             Gson gson = gsonBuilder.create();
 
+            Trial[] baselineData;
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(baseline));
+                baselineData = gson.fromJson(br, Trial[].class);
+                br.close();
+            } catch (java.io.IOException e) {
+                throw new RuntimeException(e);
+            }
+
             Set<ResultProcessor> processors = new HashSet<>();
             OutputFileDumper dumper = new OutputFileDumper(runInfo, benchmarkClass, gson, benchmarkConfig);
             processors.add(dumper);
@@ -137,6 +150,7 @@ public class Gauge {
                     resultProcessors,
                     experimentSelector,
                     executor,
+                    baselineData,
                     callback
             );
 

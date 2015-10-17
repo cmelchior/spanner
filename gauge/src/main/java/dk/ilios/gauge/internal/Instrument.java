@@ -26,6 +26,10 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import dk.ilios.gauge.bridge.AbstractLogMessageVisitor;
 import dk.ilios.gauge.bridge.StopMeasurementLogMessage;
@@ -39,11 +43,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class Instrument {
-    protected ImmutableMap<String, String> options;
+    protected Map<String, String> options;
     private String name = getClass().getSimpleName();
 
-    public void setOptions(ImmutableMap<String, String> options) {
-        this.options = ImmutableMap.copyOf( Maps.filterKeys(options, Predicates.in(instrumentOptions())));
+    public void setOptions(Map<String, String> options) {
+        this.options = Maps.filterKeys(options, Predicates.in(instrumentOptions()));
     }
 
     void setInstrumentName(String name) {
@@ -123,14 +127,14 @@ public abstract class Instrument {
          * Return the subset of options (and possibly a transformation thereof) to be used in the
          * worker. Returns all instrument options by default.
          */
-        public ImmutableMap<String, String> workerOptions() {
+        public Map<String, String> workerOptions() {
             return options;
         }
 
         abstract MeasurementCollectingVisitor getMeasurementCollectingVisitor();
     }
 
-    public final ImmutableMap<String, String> options() {
+    public final Map<String, String> options() {
         return options;
     }
 
@@ -166,7 +170,7 @@ public abstract class Instrument {
      * Returns some arguments that should be added to the command line when invoking
      * this instrument's worker.
      */
-    ImmutableSet<String> getExtraCommandLineArgs() {
+    Set<String> getExtraCommandLineArgs() {
         return JVM_ARGS;
     }
 
@@ -218,8 +222,8 @@ public abstract class Instrument {
         }
 
         @Override
-        public ImmutableList<Measurement> getMeasurements() {
-            return ImmutableList.copyOf(measurementsByDescription.values());
+        public List<Measurement> getMeasurements() {
+            return new ArrayList<>(measurementsByDescription.values());
         }
 
         @Override

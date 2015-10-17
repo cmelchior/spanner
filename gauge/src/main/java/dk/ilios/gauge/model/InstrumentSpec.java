@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Original author: gak@google.com (Gregory Kick)
  */
 
 package dk.ilios.gauge.model;
@@ -32,8 +34,6 @@ import static dk.ilios.gauge.util.PersistentHashing.getPersistentHashFunction;
 
 /**
  * A specification by which the application of an instrument can be uniquely identified.
- *
- * @author gak@google.com (Gregory Kick)
  */
 public final class InstrumentSpec {
 

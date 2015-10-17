@@ -84,6 +84,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
     //  private final Provider<ScheduledTrial> scheduledTrial;
     private final ListeningExecutorService executorProvider;
     private final Gauge.Callback callback;
+    private final Trial[] baselineData;
 
 //  public ExperimentingCaliperRun(
 //      CaliperOptions options,
@@ -112,6 +113,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
             ImmutableSet<ResultProcessor> resultProcessors,
             ExperimentSelector selector,
             ListeningExecutorService executorProvider,
+            Trial[] baselineData,
             Gauge.Callback callback
     ) {
         this.options = options;
@@ -121,13 +123,15 @@ public final class ExperimentingGaugeRun implements GaugeRun {
         this.resultProcessors = resultProcessors;
         this.selector = selector;
         this.executorProvider = executorProvider;
+        this.baselineData = baselineData;
         this.callback = callback;
     }
 
 
     @Override
     public void run() throws InvalidBenchmarkException {
-        ImmutableSet<Experiment> allExperiments = selector.selectExperiments();
+
+        ImmutableSet<Experiment> allExperiments = selector.selectExperiments(baselineData);
 
         // TODO(lukes): move this standard-out handling into the ConsoleOutput class?
         stdout.println("Experiment selection: ");
@@ -221,6 +225,10 @@ public final class ExperimentingGaugeRun implements GaugeRun {
         }
     }
 
+    private Trial getBaselineData(Trial.Result result) {
+        return null;
+    }
+
     /**
      * Schedule all the trials.
      * <p/>
@@ -270,11 +278,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
         for (int i = 0; i < options.trialsPerScenario(); i++) {
             for (Experiment experiment : experimentsToRun) {
 
-                BenchmarkSpec benchmarkSpec = new BenchmarkSpec.Builder()
-                        .className(experiment.instrumentation().benchmarkMethod().getDeclaringClass().getName())
-                        .methodName(experiment.instrumentation().benchmarkMethod().getName())
-                        .addAllParameters(experiment.userParameters())
-                        .build();
+                BenchmarkSpec benchmarkSpec = experiment.benchmarkSpec();
 
                 MeasurementCollectingVisitor measurementsVisitor = experiment.instrumentation().getMeasurementCollectingVisitor();
 
@@ -300,6 +304,8 @@ public final class ExperimentingGaugeRun implements GaugeRun {
         }
         return trials;
     }
+
+
 
     /**
      * Attempts to run each given scenario once, in the current VM. Returns a set of all of the

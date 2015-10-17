@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
+import dk.ilios.gauge.model.Trial;
 
 /**
  * Interface for classes describing an Experiment.
@@ -29,6 +30,6 @@ public interface ExperimentSelector {
     BenchmarkClass benchmarkClass();
     ImmutableSet<Instrument> instruments();
     ImmutableSetMultimap<String, String> userParameters();
-    ImmutableSet<Experiment> selectExperiments();
+    ImmutableSet<Experiment> selectExperiments(Trial[] baselineData);
     String selectionType();
 }

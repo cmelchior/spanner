@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Random;
+import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
@@ -54,7 +55,7 @@ public abstract class RuntimeWorker extends Worker {
                          Method method,
                          Ticker ticker,
                          Map<String, String> workerOptions,
-                         ImmutableSortedMap<String, String> userParameters) {
+                         SortedMap<String, String> userParameters) {
         super(benchmarkClass.getInstance(), method, userParameters);
         this.random = new Random();
         // TODO(gak): investigate whether or not we can use Stopwatch
@@ -112,7 +113,7 @@ public abstract class RuntimeWorker extends Worker {
                      Method method,
                      Ticker ticker,
                      Map<String, String> workerOptions,
-                     ImmutableSortedMap<String, String> userParameters) {
+                     SortedMap<String, String> userParameters) {
             super(benchmarkClass, method, ticker, workerOptions, userParameters);
         }
 
@@ -142,7 +143,7 @@ public abstract class RuntimeWorker extends Worker {
                     Method method,
                     Ticker ticker,
                     Map<String, String> workerOptions,
-                    ImmutableSortedMap<String, String> userParameters) {
+                    SortedMap<String, String> userParameters) {
             super(benchmarkClass, method, ticker, workerOptions, userParameters);
         }
 

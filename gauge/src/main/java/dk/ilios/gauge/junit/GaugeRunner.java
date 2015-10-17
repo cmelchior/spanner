@@ -33,6 +33,7 @@ import dk.ilios.gauge.Benchmark;
 import dk.ilios.gauge.BenchmarkConfiguration;
 import dk.ilios.gauge.Gauge;
 import dk.ilios.gauge.GaugeConfig;
+import dk.ilios.gauge.exception.TrialFailureException;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.model.Measurement;
 import dk.ilios.gauge.model.Run;
@@ -41,14 +42,13 @@ import dk.ilios.gauge.model.Trial;
 
 /**
  * Runner for handling the individual Benchmarks.
- * If a new benchmark is outside it the allowed variance, it will fail.
  */
 public class GaugeRunner extends Runner {
 
     private Object testInstance;
     private TestClass testClass;
     private List<Method> testMethods = new ArrayList();
-    private GaugeConfig benchmarkConfiguration = new GaugeConfig.Builder().build();
+    private GaugeConfig benchmarkConfiguration;
 
     public GaugeRunner(Class clazz) {
         testClass = new TestClass(clazz);
@@ -59,22 +59,22 @@ public class GaugeRunner extends Runner {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
         // Setup config (if any)
         List<FrameworkField> fields = testClass.getAnnotatedFields(BenchmarkConfiguration.class);
+
         if (fields.size() > 1) {
             throw new IllegalStateException("Only one @BenchmarkConfiguration allowed");
         }
         if (fields.size() > 0) {
+            FrameworkField field = fields.get(0);
             try {
-                FrameworkField field = fields.get(0);
                 if (!field.getType().equals(GaugeConfig.class)) {
                     throw new IllegalArgumentException("@BenchmarkConfiguration can only be set on " +
                             "GaugeConfiguration fields.");
                 }
                 benchmarkConfiguration = (GaugeConfig) field.get(testInstance);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                throw new RuntimeException(field + " is not public", e);
             }
         }
 
@@ -82,14 +82,12 @@ public class GaugeRunner extends Runner {
         for (int i = 0; i < classMethods.length; i++) {
             Method classMethod = classMethods[i];
             Class retClass = classMethod.getReturnType();
-            int length = classMethod.getParameterTypes().length;
             int modifiers = classMethod.getModifiers();
             if (retClass == null || Modifier.isStatic(modifiers)
                     || !Modifier.isPublic(modifiers) || Modifier.isInterface(modifiers)
                     || Modifier.isAbstract(modifiers)) {
                 continue;
             }
-            String methodName = classMethod.getName();
             if (classMethod.getAnnotation(Benchmark.class) != null) {
                 testMethods.add(classMethod);
             }
@@ -143,11 +141,18 @@ public class GaugeRunner extends Runner {
                 double resultMedian = getMedian(result.getTrial().measurements());
                 Description spec = getDescription(trial, resultMedian);
                 runNotifier.fireTestStarted(spec);
+
+                double absChange = Math.abs(trial.getChangeFromBaseline());
+                if (absChange > benchmarkConfiguration.getBaselineFailure()) {
+                    runNotifier.fireTestFailure(new Failure(spec,
+                            new TrialFailureException(String.format("Change from baseline was to big: %.2f%%. Limit is %.2f%%",
+                                    absChange, benchmarkConfiguration.getBaselineFailure()))));
+                }
                 runNotifier.fireTestFinished(spec);
             }
 
             // FIXME Move this to Trial.Result
-            private double getMedian(ImmutableList<Measurement> trialMeasurements) {
+            private double getMedian(List<Measurement> trialMeasurements) {
 
                 // Group by measurement description
                 // TODO Figure out why measurents can have multiple descriptions
@@ -208,9 +213,15 @@ public class GaugeRunner extends Runner {
             private Description getDescription(Trial trial, double result) {
                 Method method = trial.experiment().instrumentation().benchmarkMethod();
                 String resultString = String.format(" [%.2f ns.]", result);
+                resultString += formatBenchmarkChange(trial);
                 return Description.createTestDescription(testClass.getJavaClass(), method.getName() + resultString);
             }
         });
     }
 
+    private String formatBenchmarkChange(Trial trial) {
+        Double change = trial.getChangeFromBaseline();
+        if (change == null) return "";
+        return String.format("[%s%.2f%%]", change > 0 ? "+" : "", change);
+    }
 }

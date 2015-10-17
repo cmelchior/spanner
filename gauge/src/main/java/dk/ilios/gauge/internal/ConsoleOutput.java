@@ -56,7 +56,6 @@ final class ConsoleOutput implements Closeable {
     private final int numberOfTrials;
     private final Stopwatch stopwatch;
 
-
     public ConsoleOutput(StdOut stdout, int numberOfTrials, Stopwatch stopwatch) {
         this.stdout = stdout;
         this.numberOfTrials = numberOfTrials;
@@ -80,7 +79,10 @@ final class ConsoleOutput implements Closeable {
      * Prints a summary of a successful trial result.
      */
     void processTrial(Trial.Result result) {
+        Trial baseline = result.getExperiment().getBaseline();
+
         trialsCompleted++;
+
         stdout.printf("Trial Report (%d of %d):%n  Experiment %s%n",
                 trialsCompleted, numberOfTrials, result.getExperiment());
         if (!result.getTrialMessages().isEmpty()) {
@@ -91,6 +93,9 @@ final class ConsoleOutput implements Closeable {
             }
         }
         Trial trial = result.getTrial();
+
+        // Group measurements by their description
+        // TODO Why? All measurements for a single trial should have the same description
         ImmutableListMultimap<String, Measurement> measurementsIndex =
                 new ImmutableListMultimap.Builder<String, Measurement>()
                         .orderKeysBy(Ordering.natural())
@@ -101,16 +106,13 @@ final class ConsoleOutput implements Closeable {
                             }
                         }))
                         .build();
+
         stdout.println("  Results:");
         for (Map.Entry<String, Collection<Measurement>> entry : measurementsIndex.asMap().entrySet()) {
+
             Collection<Measurement> measurements = entry.getValue();
-            ImmutableSet<String> units = FluentIterable.from(measurements)
-                    .transform(new Function<Measurement, String>() {
-                        @Override
-                        public String apply(Measurement input) {
-                            return input.value().unit();
-                        }
-                    }).toSet();
+            String unit = measurements.iterator().next().value().unit();
+
             double[] weightedValues = new double[measurements.size()];
             int i = 0;
             for (Measurement measurement : measurements) {
@@ -120,19 +122,27 @@ final class ConsoleOutput implements Closeable {
             Percentile percentile = new Percentile();
             percentile.setData(weightedValues);
             DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(weightedValues);
-            String unit = Iterables.getOnlyElement(units);
             stdout.printf(
-                    "    %s%s: min=%.2f, 1st qu.=%.2f, median=%.2f, mean=%.2f, 3rd qu.=%.2f, max=%.2f%n",
+                    "    %s%s: min=%.2f, 1st qu.=%.2f, median=%.2f (%s), mean=%.2f, 3rd qu.=%.2f, max=%.2f%n",
                     entry.getKey(), unit.isEmpty() ? "" : "(" + unit + ")",
                     descriptiveStatistics.getMin(), percentile.evaluate(25),
-                    percentile.evaluate(50), descriptiveStatistics.getMean(),
-                    percentile.evaluate(75), descriptiveStatistics.getMax());
+                    percentile.evaluate(50),
+                    calculateDiff(percentile.evaluate(50), baseline),
+                    descriptiveStatistics.getMean(), percentile.evaluate(75),
+                    descriptiveStatistics.getMax());
         }
 
         instrumentSpecs.add(trial.instrumentSpec());
         Scenario scenario = trial.scenario();
         benchmarkSpecs.add(scenario.benchmarkSpec());
         numMeasurements += trial.measurements().size();
+    }
+
+    private String calculateDiff(double newMedian, Trial oldValue) {
+        if (oldValue == null) return "-";
+        double oldMedian = oldValue.getMedian();
+        double diff = (oldMedian - newMedian) * 100 / oldMedian;
+        return String.format("%s%.2f%%", diff > 0 ? "+" : "", diff);
     }
 
     @Override

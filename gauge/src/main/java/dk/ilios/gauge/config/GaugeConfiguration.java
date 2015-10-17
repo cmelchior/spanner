@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -264,4 +265,34 @@ public final class GaugeConfiguration {
             throw new InvalidConfigurationException(String.format(messageFormat, args));
         }
     }
+
+    /**
+     * Helper method that searches a directory for json files. The newest json file will be returned.
+     * Using this methods assume that all json files in the folder are valid trial results.
+     *
+     * @param dir Directory to search.
+     * @return Reference to the latest JSON file or null if no json files where found.
+     */
+    public static File getLatestJsonFile(File dir) {
+        File fl = dir;
+        File[] files = fl.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return file.isFile();
+            }
+        });
+        if (files == null) {
+            return null;
+        }
+        long lastMod = Long.MIN_VALUE;
+        File choice = null;
+        for (File file : files) {
+            if (!file.getName().toLowerCase().endsWith(".json")) continue;
+            if (file.lastModified() > lastMod) {
+                choice = file;
+                lastMod = file.lastModified();
+            }
+        }
+        return choice;
+    }
+
 }

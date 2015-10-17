@@ -15,19 +15,16 @@
  */
 package dk.ilios.gauge.worker;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedMap;
-import com.sun.jersey.api.client.async.TypeListener;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.ParseException;
+import java.util.Set;
+import java.util.SortedMap;
 
 import dk.ilios.gauge.AfterExperiment;
 import dk.ilios.gauge.BeforeExperiment;
 import dk.ilios.gauge.Param;
 import dk.ilios.gauge.model.Measurement;
-import dk.ilios.gauge.model.Run;
 import dk.ilios.gauge.util.Parser;
 import dk.ilios.gauge.util.Parsers;
 import dk.ilios.gauge.util.Reflection;
@@ -37,14 +34,14 @@ import dk.ilios.gauge.util.Reflection;
  */
 public abstract class Worker {
 
-    private final ImmutableSortedMap<String, String> userParameters;
-    private ImmutableSet<Method> beforeExperimentMethods;
-    private ImmutableSet<Method> afterExperimentMethods;
+    private final SortedMap<String, String> userParameters;
+    private Set<Method> beforeExperimentMethods;
+    private Set<Method> afterExperimentMethods;
 
     protected final Method benchmarkMethod;
     protected final Object benchmark;
 
-    protected Worker(Object benchmark, Method method, ImmutableSortedMap<String, String> userParameters) {
+    protected Worker(Object benchmark, Method method, SortedMap<String, String> userParameters) {
         this.benchmark = benchmark;
         this.benchmarkMethod = method;
         this.beforeExperimentMethods = Reflection.getAnnotatedMethods(benchmark.getClass(), BeforeExperiment.class);

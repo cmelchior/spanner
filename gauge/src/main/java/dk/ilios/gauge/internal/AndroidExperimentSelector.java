@@ -11,13 +11,12 @@ import com.google.common.collect.Sets;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import dk.ilios.gauge.internal.benchmark.BenchmarkClass;
+import dk.ilios.gauge.model.Trial;
 
 /**
  * Experiment selector for Android.
@@ -59,7 +58,9 @@ public class AndroidExperimentSelector implements ExperimentSelector {
     }
 
     @Override
-    public ImmutableSet<Experiment> selectExperiments() {
+    public ImmutableSet<Experiment> selectExperiments(Trial[] baselineData) {
+
+
         try {
             // Create all combinations
             List<Experiment> experiments = new ArrayList<>();
@@ -68,7 +69,9 @@ public class AndroidExperimentSelector implements ExperimentSelector {
                     for (List<String> userParamsChoice : cartesian(userParameters)) { // of parameters
                         ImmutableMap<String, String> experimentBenchmarkParameters = zip(userParameters.keySet(), userParamsChoice);
                         Instrument.Instrumentation instrumentation = instrument.createInstrumentation(method);
-                        experiments.add(new Experiment(instrumentation, experimentBenchmarkParameters ));
+                        Experiment experiment = new Experiment(instrumentation, experimentBenchmarkParameters);
+                        experiment.setBaseline(findBaseline(experiment, baselineData));
+                        experiments.add(experiment);
                     }
                 }
             }
@@ -76,6 +79,35 @@ public class AndroidExperimentSelector implements ExperimentSelector {
         } catch (InvalidBenchmarkException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Find an trial from an old experiment that can be used for a new experiment of the same kind.
+     *
+     * @param experiment new experiment
+     * @param baselineData old trial data
+     * @return trial that was run on a previous experiment or null of no trial matches.
+     */
+    private Trial findBaseline(Experiment experiment, Trial[] baselineData) {
+        for (Trial trial : baselineData) {
+
+            // Need same instrumentationSpec: instrumentationClass + parameters
+            if (!experiment.instrumentation().instrument().getSpec().equals(trial.instrumentSpec())) {
+                continue;
+            }
+
+            // Need same benchmarkSpec: class, method and parameters
+            if (!experiment.benchmarkSpec().equals(trial.scenario().benchmarkSpec())) {
+                continue;
+            }
+
+            // Other parameters might differ like number of measurements/trials. These are excluded for the
+            // purpose of finding a a previous trial, so if we got this far the trial is sufficiently similar
+            // to function as a baseline for the given experiment.
+            return trial;
+        }
+
+        return null;
     }
 
     @Override

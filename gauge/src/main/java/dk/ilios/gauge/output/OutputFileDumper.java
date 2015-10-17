@@ -24,7 +24,6 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 
-import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;

@@ -1,6 +1,6 @@
 package dk.ilios.gauge.internal;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 import dk.ilios.gauge.bridge.LogMessageVisitor;
 import dk.ilios.gauge.model.Measurement;
@@ -9,7 +9,7 @@ public interface MeasurementCollectingVisitor extends LogMessageVisitor {
 
     boolean isDoneCollecting();
     boolean isWarmupComplete();
-    ImmutableList<Measurement> getMeasurements();
+    List<Measurement> getMeasurements();
 
     /**
      * Returns all the messages created while collecting measurements.
@@ -20,6 +20,6 @@ public interface MeasurementCollectingVisitor extends LogMessageVisitor {
      * <p>TODO(lukes): should we model these as anything more than strings.  These messages already
      * have a concept of 'level' based on the prefix.
      */
-    ImmutableList<String> getMessages();
+    List<String> getMessages();
 }
 

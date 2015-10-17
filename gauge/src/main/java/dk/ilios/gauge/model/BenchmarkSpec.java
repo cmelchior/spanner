@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Original author: gak@google.com (Gregory Kick)
  */
 
 package dk.ilios.gauge.model;
@@ -37,8 +39,6 @@ import dk.ilios.gauge.util.StringMapFunnel;
 
 /**
  * A specification by which a benchmark method invocation can be uniquely identified.
- *
- * @author gak@google.com (Gregory Kick)
  */
 public final class BenchmarkSpec implements Serializable {
     private static final long serialVersionUID = 1L;

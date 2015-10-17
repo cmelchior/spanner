@@ -16,6 +16,7 @@ public class GaugeConfig {
     private final URL uploadUrl;
     private final String apiKey;
     private final boolean uploadResults;
+    private double baselineFailure;
 
     private GaugeConfig(Builder builder) {
         this.resultsFolder = builder.resultsFolder;
@@ -25,6 +26,7 @@ public class GaugeConfig {
         this.uploadResults = builder.uploadResults;
         this.uploadUrl = builder.uploadUrl;
         this.apiKey = builder.apiKey;
+        this.baselineFailure = builder.baselineFailure;
     }
 
     public File getResultsFolder() {
@@ -55,6 +57,10 @@ public class GaugeConfig {
         return uploadResults;
     }
 
+    public double getBaselineFailure() {
+        return baselineFailure;
+    }
+
     /**
      * Builder for fluent construction of a GaugeConfig object.
      */
@@ -66,6 +72,7 @@ public class GaugeConfig {
         private boolean uploadResults = false;
         private String apiKey = null;
         private URL uploadUrl = getUrl("https://microbenchmarks.appspot.com/");
+        private  double baselineFailure = 20.0; // If change from baseline is bigger, fail experiment
 
         public Builder() {
         }
@@ -133,6 +140,14 @@ public class GaugeConfig {
 
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
+            return this;
+        }
+
+        public Builder baselineFailure(double percentage) {
+            if (percentage < 0 || percentage > 100) {
+                throw new IllegalArgumentException("Percentage must be [0,100]. Yours was: " + percentage);
+            }
+            baselineFailure = percentage;
             return this;
         }
 

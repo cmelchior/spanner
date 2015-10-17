@@ -106,17 +106,28 @@ public class Measurement implements Serializable {
         private Double weight;
         private String description;
 
+        /**
+         * The measurement value.
+         */
         public Builder value(Value value) {
             this.value = checkNotNull(value);
             return this;
         }
 
+        /**
+         * The weight of the value. Normally this is 1, but for a test that internally does repetitions
+         * to get above the timer granularity, the weight is the number repetitions done internally by
+         * the benchmark method.
+         */
         public Builder weight(double weight) {
             checkArgument(weight > 0);
             this.weight = weight;
             return this;
         }
 
+        /**
+         * A description of what is being measured (if needed).
+         */
         public Builder description(String description) {
             this.description = checkNotNull(description);
             return this;
