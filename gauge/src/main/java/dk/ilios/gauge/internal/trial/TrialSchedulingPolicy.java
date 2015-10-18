@@ -16,7 +16,7 @@ package dk.ilios.gauge.internal.trial;
 
 /**
  * The scheduling policy for a particular trial with regard to other trials
- * <p/>
+ * <p>
  * <p>TODO(lukes): Currently this is extremely simple.  Trials can be scheduled in parallel with
  * other trials or not.  In the future, this should use some kind of cost modeling.
  *

@@ -39,7 +39,7 @@ import dk.ilios.gauge.json.ExcludeFromJson;
 
 /**
  * An invocation of a single {@link Experiment}.
- * <p/>
+ * <p>
  * Once a trial is completed, call {@link #getResult()} to get the result. From that point, all further modifications
  * to the object Trial object will fail.
  */

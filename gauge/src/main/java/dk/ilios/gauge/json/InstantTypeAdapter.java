@@ -28,7 +28,7 @@ import org.threeten.bp.format.DateTimeFormatter;
 import java.io.IOException;
 
 /**
- * Serializes and deserializes {@link Instant} instances.
+ * Serializes and deserializes {@code Instant} instances.
  */
 public final class InstantTypeAdapter extends TypeAdapter<Instant> {
 

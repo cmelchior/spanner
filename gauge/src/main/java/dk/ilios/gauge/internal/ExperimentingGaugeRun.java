@@ -211,7 +211,7 @@ public final class ExperimentingGaugeRun implements GaugeRun {
 
     /**
      * Schedule all the trials.
-     * <p/>
+     * <p>
      * <p>This method arranges all the {@link ScheduledTrial trials} to run according to their
      * scheduling criteria.  The executor instance is responsible for enforcing max parallelism.
      */

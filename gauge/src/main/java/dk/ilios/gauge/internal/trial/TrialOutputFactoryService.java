@@ -37,7 +37,7 @@ import dk.ilios.gauge.options.GaugeOptions;
 /**
  * A {@link TrialOutputFactory} implemented as a service that manages a directory either under
  * {@code /tmp} or in a user configured directory.
- * <p/>
+ * <p>
  * <p>If there is a user configured directory, then no files will be deleted on service shutdown.
  * Otherwise the only way to ensure that the log files survive service shutdown is to explicitly
  * call {@link #persistFile(File)} with each file that should not be deleted.

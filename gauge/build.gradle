@@ -1,4 +1,12 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'ch.netzwerg.release'
+
+def group = 'dk.ilios'
+def currentVersion = file("${projectDir}/version.txt").text.trim();
+def version = currentVersion
 
 android {
     compileSdkVersion 23
@@ -20,6 +28,10 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -35,3 +47,155 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
+
+def commonPom = {
+    licenses {
+        license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+        }
+    }
+    issueManagement {
+        system 'github'
+        url 'https://github.com/realm/realm-java/issues'
+    }
+    scm {
+        url 'scm:https://github.com/realm/realm-java'
+        connection 'scm:git@github.com:realm/realm-java.git'
+        developerConnection 'scm:git@github.com:realm/realm-java.git'
+    }
+}
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            artifactId = 'gauge'
+            artifact file("${rootDir}/gauge/build/outputs/aar/gauge-release.aar")
+            artifact sourcesJar
+            artifact javadocJar
+            pom.withXml {
+                Node root = asNode()
+                root.appendNode('name', 'realm-android')
+                root.appendNode('description', 'Realm is a mobile database: a replacement for SQLite & ORMs.')
+                root.appendNode('url', 'http://realm.io')
+//                root.appendNode('packaging', 'aar')
+                root.children().last() + commonPom
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'https://oss.jfrog.org/artifactory'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = project.hasProperty('gaugeBintrayUser') ? gaugeBintrayUser : 'noUser'
+            password = project.hasProperty('gaugeBintrayUser') ? gaugeBintrayUser : 'noKey'
+        }
+        defaults {
+            publications ('library')
+        }
+    }
+}
+
+bintray {
+    user = project.hasProperty('gaugeBintrayUser') ? gaugeBintrayUser : 'noUser'
+    key = project.hasProperty('gaugeBintrayUser') ? gaugeBintrayUser : 'noKey'
+
+    dryRun = true
+    publish = false
+
+    publications = ['library']
+    pkg {
+        repo = 'maven'
+        name = 'gauge'
+        desc = 'Gauge - Microbencmarks on Android'
+        websiteUrl = 'https://github.com/cmelchior/caliper'
+        issueTrackerUrl = 'https://github.com/cmelchior/caliper/issues'
+        vcsUrl = 'https://github.com/cmelchior/caliper.git'
+        licenses = ['Apache-2.0']
+        labels = ['aar', 'android', 'gauge', 'benchmark']
+        publicDownloadNumbers = false
+    }
+}
+
+// Configure ch.netzwerg.release plugin
+// See https://github.com/netzwerg/gradle-release-plugin
+release {
+    dependsOn build
+    push = true
+    versionSuffix = '-SNAPSHOT'
+    tagPrefix = 'v'
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+//bintray {
+//    // gaugeBintrayUser and gaugeBintrayKey come from the gradle.properties file in ~/.gradle
+//    user = project.hasProperty('bintrayUser') ? bintrayUser : 'noUser'
+//    key = project.hasProperty('bintrayKey') ? bintrayKey : 'noKey'
+//
+//    configurations = ['archives'] //When uploading configuration files
+//    pkg {
+//        repo = 'android'
+//        name = project.name
+//        desc = 'Bintray aar publishing example'
+//        websiteUrl = siteUrl
+//        issueTrackerUrl = 'https://github.com/bintray/bintray-examples/issues'
+//        vcsUrl = gitUrl
+//        licenses = ['Apache-2.0']
+//        labels = ['aar', 'android', 'gauge', 'benchmark']
+//        publicDownloadNumbers = false
+//    }
+//}
+//
+//install {
+//    repositories.mavenInstaller {
+//        pom {
+//            project {
+//                packaging 'aar'
+//                name 'Gauge'
+//                url siteUrl
+//                licenses {
+//                    license {
+//                        name 'The Apache Software License, Version 2.0'
+//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id 'cmelchior'
+//                        name 'Christian Melchior'
+//                        email 'christian@ilios.dk'
+//                    }
+//                }
+//                scm {
+//                    connection 'https://github.com/bintray/bintray-examples.git'
+//                    developerConnection 'https://github.com/bintray/bintray-examples.git'
+//                    url siteUrl
+//
+//                }
+//            }
+//        }
+//    }
+//}

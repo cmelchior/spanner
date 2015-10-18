@@ -13,10 +13,10 @@ public interface MeasurementCollectingVisitor extends LogMessageVisitor {
 
     /**
      * Returns all the messages created while collecting measurements.
-     * <p/>
+     * <p>
      * <p>A message is some piece of user visible data that should be displayed to the user along
      * with the trial results.
-     * <p/>
+     * <p>
      * <p>TODO(lukes): should we model these as anything more than strings.  These messages already
      * have a concept of 'level' based on the prefix.
      */

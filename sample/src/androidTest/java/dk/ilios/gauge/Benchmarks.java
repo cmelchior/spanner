@@ -1,5 +1,6 @@
 package dk.ilios.gauge;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 
@@ -14,6 +15,7 @@ import dk.ilios.gauge.junit.GaugeRunner;
 @RunWith(GaugeRunner.class)
 public class Benchmarks {
 
+    @SuppressLint("InlinedApi")
     private File externalDir = InstrumentationRegistry.getTargetContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
     private File resultsDir = new File(externalDir, "results");
 //    private File baseLineFile = new File(resultstsDir, "baseline.json");

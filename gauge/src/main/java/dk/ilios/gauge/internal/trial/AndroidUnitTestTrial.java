@@ -24,7 +24,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 /**
  * A Trial that is running on the thread it was started on.
  * This can be useful when e.g. running tests on the Android UI thread.
- * <p/>
+ * <p>
  * Warning: This will block the executing thread until the trial is complete.
  */
 public class AndroidUnitTestTrial implements Callable<Trial.Result> {

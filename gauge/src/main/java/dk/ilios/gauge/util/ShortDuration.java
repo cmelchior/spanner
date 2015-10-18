@@ -134,7 +134,7 @@ public abstract class ShortDuration implements Comparable<ShortDuration> {
     /**
      * Returns an instance of this type that represents the product of this value and {@code
      * multiplicand}, rounded according to {@code roundingMode} if necessary.
-     * <p/>
+     * <p>
      * <p>If this class represents an amount that is "continuous" rather than discrete, the
      * implementation of this method may simply ignore the rounding mode.
      */
@@ -143,7 +143,7 @@ public abstract class ShortDuration implements Comparable<ShortDuration> {
     /**
      * Returns an instance of this type that represents this value divided by the integral
      * value {@code divisor}, rounded according to {@code roundingMode} if necessary.
-     * <p/>
+     * <p>
      * <p>If this class represents an amount that is "continuous" rather than discrete, the
      * implementation of this method may simply ignore the rounding mode.
      */
@@ -152,7 +152,7 @@ public abstract class ShortDuration implements Comparable<ShortDuration> {
     /**
      * Returns an instance of this type that represents this value divided by {@code
      * divisor}, rounded according to {@code roundingMode} if necessary.
-     * <p/>
+     * <p>
      * <p>If this class represents an amount that is "continuous" rather than discrete, the
      * implementation of this method may simply ignore the rounding mode.
      */

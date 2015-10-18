@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * <p>This class is instantiated and injected only once per child VM invocation, to measure one
  * particular combination of parameters.
  *
- * <p>For example: <pre>   {@code
+ * <p>For example: {@code
  *   public final class MyBenchmark {
  *     {@literal @}Param FeatureEnum feature;
  *     {@literal @}Param({"1", "10", "100"}) int size;
@@ -67,7 +67,7 @@ import java.lang.annotation.Target;
  *       // benchmark another operation of MyObject that doesn't require a reps parameter
  *     }
  *   }
- * </pre>
+ * }
  *
  * <p>The benchmark class MyBenchmark has two benchmark methods ({@code foo} and {@code bar}) and
  * two {@link Param Params} ({@code feature} and {@code size}). For each experiment performed by

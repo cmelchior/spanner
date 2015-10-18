@@ -26,10 +26,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
- * This is the configuration passed to the {@link dk.ilios.gauge.http.ResultProcessor} by the
+ * This is the configuration passed to the {@link dk.ilios.gauge.output.ResultProcessor} by the
  * user.
- *
- * @author
  */
 public class ResultProcessorConfig {
     private final String className;

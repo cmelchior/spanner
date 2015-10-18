@@ -7,6 +7,7 @@ It is a fork of the original Caliper project started by Google: code.google.com/
 
 # Getting started
 
+
 ## Getting Gauge
 
 * JCenter
@@ -20,7 +21,19 @@ It is a fork of the original Caliper project started by Google: code.google.com/
 * How to use baseline
 * Web UI
 
-## 
+# Using this repo
+
+* Current version is defined in *versiont.txt*
+
+
+**Installing a local SNAPSHOT**
+
+    >./gradlew clean gauge:publishToMavenLocal
+
+**Releasing a new version**
+
+
+
 
 
 
@@ -112,6 +125,12 @@ Ahead-of-time compilers do not modify the code while it is running, as such when
 
 * Be mindful of measured overhead
 * Results do not say anything about the absolute speed
+
+
+## Math
+
+* What is confidence interval. 
+* What is variance Variance, how to interpret it
 
 
 ## Resources
