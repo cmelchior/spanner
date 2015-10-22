@@ -21,8 +21,7 @@ allprojects {
 
 //     apply plugin: 'android-sdk-manager'
 
-    group = 'dk.ilios'
-    version = file("${rootDir}/version.txt").text.trim();
+//    version = file("${rootDir}/version.txt").text.trim();
     repositories {
         jcenter()
         mavenLocal()

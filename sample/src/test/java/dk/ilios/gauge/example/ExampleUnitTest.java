@@ -1,4 +1,4 @@
-package dk.ilios.gauge.example;
+package dk.ilios.spanner.example;
 
 import org.junit.Test;
 

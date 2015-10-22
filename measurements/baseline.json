@@ -8,7 +8,7 @@
     },
     "id": "2650498d-df10-4d33-8fff-39f482eafc5d",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -102,7 +102,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "directComparison",
         "parameters": {
@@ -126,7 +126,7 @@
     },
     "id": "724f2b41-6add-4032-bc49-66d71ca15109",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -220,7 +220,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "directComparison",
         "parameters": {
@@ -244,7 +244,7 @@
     },
     "id": "b17de073-0f94-4abe-8fb2-0a3a540c2718",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -338,7 +338,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "equalsTo",
         "parameters": {
@@ -362,7 +362,7 @@
     },
     "id": "79903802-3e47-4e0c-9320-045c3242ccdc",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -456,7 +456,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "equalsTo",
         "parameters": {
@@ -480,7 +480,7 @@
     },
     "id": "e1ccc41d-5f25-4bb3-846d-fc69472a29f7",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -574,7 +574,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "instanceOf",
         "parameters": {
@@ -598,7 +598,7 @@
     },
     "id": "21702df1-a952-4aae-a884-cf78f656ff54",
     "instrumentSpec": {
-      "className": "dk.ilios.gauge.internal.RuntimeInstrument",
+      "className": "dk.ilios.spanner.internal.RuntimeInstrument",
       "options": {}
     },
     "measurements": [
@@ -692,7 +692,7 @@
     },
     "scenario": {
       "benchmarkSpec": {
-        "className": "dk.ilios.gauge.Benchmarks",
+        "className": "dk.ilios.spanner.Benchmarks",
         "id": 0,
         "methodName": "instanceOf",
         "parameters": {

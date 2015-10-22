@@ -1,20 +1,20 @@
-Gauge
+Spanner
 =====
 
-Gauge is a micro benchmarking framework for the Android platform.
+Spanner is a micro benchmarking framework designed to run on the Android platform.
 
-It is a fork of the original Caliper project started by Google: code.google.com/p/caliper
+It is a fork of the original Caliper project for Java started by Google: code.google.com/p/caliper
 
 # Getting started
 
 
-## Getting Gauge
+## Getting Spanner
 
 * JCenter
 * Adding to gradle.build
 
 
-## Running Gauge
+## Running Spanner
 
 * Example of unit test
 * Example of stand-alone tests
@@ -29,17 +29,14 @@ It is a fork of the original Caliper project started by Google: code.google.com/
 **Build a new SNAPSHOT**
 1) Check version in `version.txt`
 2) 
-    > ./gradlew gauge:build
+    > ./gradlew spanner:build
 
 **Installing a local SNAPSHOT**
 
-    >./gradlew clean gauge:publishToMavenLocal
+    >./gradlew clean spanner:publishToMavenLocal
 
 
 **Releasing a new version**
-
-
-
 
 
 
@@ -48,9 +45,9 @@ It is a fork of the original Caliper project started by Google: code.google.com/
 ## Why should I benchmark?
 
 
-## Benchmarking with Gauge
+## Benchmarking with Spanner
 
-Each invocation of Gauge is called a *Run*. Each run consists of 1 benchmark class and one or more methods.
+Each invocation of Spanner is called a *Run*. Each run consists of 1 benchmark class and one or more methods.
 
 A run has different *axis'*, e.g. method to run, parameters to use and VM parameters.
 
@@ -74,7 +71,7 @@ smooth our irregularities and gain confidence in our results.
 Each trial will output statistics about the measurements like min, max, mean. For those reasons it is also preferable to 
 run multiple trials so the confidence in the output from a Trial can be validated.
 
-The output from a Gauge benchmark is the results of all the experiments.
+The output from a Spanner benchmark is the results of all the experiments.
 
 ## Benchmarking pitfalls
 
@@ -126,17 +123,25 @@ Ahead-of-time compilers do not modify the code while it is running, as such when
 ### Compiler optimizations
 
 * Compiler can reorder/remove code.
+* Compile to native code.
 
 ### Interpreting results
 
-* Be mindful of measured overhead
-* Results do not say anything about the absolute speed
+* Be mindful of measured overhead.
+* Results do not say anything about the absolute speed.
 
 
 ## Math
 
-* What is confidence interval. 
-* What is variance Variance, how to interpret it
+* What is the confidence interval. 
+* What is variance, how to interpret it.
+
+
+## FAQ
+
+**Why spanner?**
+
+Because a Spanner is much more useful than a Caliper when working with Androids.
 
 
 ## Resources
