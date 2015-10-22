@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package dk.ilios.gauge.runner;
-import com.android.internal.util.Predicate;
 
 import java.util.Arrays;
 /**

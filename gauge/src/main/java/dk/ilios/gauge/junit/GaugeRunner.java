@@ -1,17 +1,12 @@
 package dk.ilios.gauge.junit;
 
-import android.support.annotation.NonNull;
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.descriptive.rank.Percentile;
 import org.junit.Ignore;
 import org.junit.runner.Description;
@@ -21,7 +16,6 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.FrameworkField;
 import org.junit.runners.model.TestClass;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -36,8 +30,6 @@ import dk.ilios.gauge.GaugeConfig;
 import dk.ilios.gauge.exception.TrialFailureException;
 import dk.ilios.gauge.internal.InvalidBenchmarkException;
 import dk.ilios.gauge.model.Measurement;
-import dk.ilios.gauge.model.Run;
-import dk.ilios.gauge.model.Scenario;
 import dk.ilios.gauge.model.Trial;
 
 /**
@@ -104,6 +96,13 @@ public class GaugeRunner extends Runner {
                 this.testClass.getJavaClass().getAnnotations()
         );
         return spec;
+    }
+
+    /**
+     * @return the number of tests to be run by the receiver
+     */
+    public int testCount() {
+        return testMethods.size();
     }
 
     //
@@ -205,13 +204,11 @@ public class GaugeRunner extends Runner {
                 /* Ignore */
             }
 
-            @NonNull
             private Description getDescription(Trial trial) {
                 Method method = trial.experiment().instrumentation().benchmarkMethod();
                 return Description.createTestDescription(testClass.getJavaClass(), method.getName());
             }
 
-            @NonNull
             private Description getDescription(Trial trial, double result) {
                 Method method = trial.experiment().instrumentation().benchmarkMethod();
                 String resultString = String.format(" [%.2f ns.]", result);

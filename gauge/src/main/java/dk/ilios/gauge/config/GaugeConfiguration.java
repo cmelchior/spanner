@@ -18,8 +18,6 @@
 
 package dk.ilios.gauge.config;
 
-import android.support.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -216,8 +214,7 @@ public final class GaugeConfiguration {
 
     // TODO(gak): check that the directory seems to be a jdk home (with a java binary and all of that)
     // TODO(gak): make this work with different directory layouts.  I'm looking at you OS X...
-    private static File getJdkHomeDir(@Nullable String baseDirectoryPath,
-                                      @Nullable String homeDirPath, String vmConfigName)
+    private static File getJdkHomeDir(String baseDirectoryPath, String homeDirPath, String vmConfigName)
             throws InvalidConfigurationException {
         if (homeDirPath == null) {
             File baseDirectory = getBaseDirectory(baseDirectoryPath);

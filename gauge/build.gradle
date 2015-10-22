@@ -3,6 +3,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'ch.netzwerg.release'
+apply plugin: 'checkstyle'
 
 def group = 'dk.ilios'
 def currentVersion = file("${projectDir}/version.txt").text.trim();
@@ -17,7 +18,9 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -35,17 +38,19 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support.test:runner:0.4'
-    compile 'com.android.support.test:rules:0.4'
+
+    // TODO Should be provided by the application
+    provided 'com.android.support:support-annotations:23.0.1'
+    provided 'com.android.support.test:runner:0.4.1'
+    provided 'com.android.support.test:rules:0.4.1'
+    provided 'junit:junit:4.12'
+
+    // Required dependencies
     compile 'com.google.guava:guava:18.0'
     compile 'org.threeten:threetenbp:1.3.1'
     compile 'com.google.code.gson:gson:2.4'
     compile 'org.apache.commons:commons-math:2.2'
     compile 'com.sun.jersey:jersey-client:1.11'
-
-    testCompile 'junit:junit:4.12'
 }
 
 def commonPom = {
@@ -79,7 +84,16 @@ publishing {
                 root.appendNode('name', 'realm-android')
                 root.appendNode('description', 'Realm is a mobile database: a replacement for SQLite & ORMs.')
                 root.appendNode('url', 'http://realm.io')
-//                root.appendNode('packaging', 'aar')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.compile.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                }
+                root.appendNode('packaging', 'aar')
                 root.children().last() + commonPom
             }
         }
@@ -148,6 +162,22 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
+
+task checkstyle(type: Checkstyle) {
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+    exclude '**/R.java'
+    exclude '**/BuildConfig.java'
+
+//    def configProps = ['proj.module.dir': projectDir.absolutePath]
+//    configProperties configProps
+
+    // empty classpath
+    classpath = files()
+}
+
+
 
 
 //bintray {

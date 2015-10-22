@@ -26,9 +26,15 @@ It is a fork of the original Caliper project started by Google: code.google.com/
 * Current version is defined in *versiont.txt*
 
 
+**Build a new SNAPSHOT**
+1) Check version in `version.txt`
+2) 
+    > ./gradlew gauge:build
+
 **Installing a local SNAPSHOT**
 
     >./gradlew clean gauge:publishToMavenLocal
+
 
 **Releasing a new version**
 

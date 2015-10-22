@@ -16,7 +16,6 @@
 
 package dk.ilios.gauge.runner;
 
-import com.android.internal.util.Predicate;
 import android.test.suitebuilder.TestMethod;
 
 import java.lang.annotation.Annotation;

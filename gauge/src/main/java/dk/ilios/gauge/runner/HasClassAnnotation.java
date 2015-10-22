@@ -19,7 +19,6 @@ package dk.ilios.gauge.runner;
 import java.lang.annotation.Annotation;
 
 import android.test.suitebuilder.TestMethod;
-import com.android.internal.util.Predicate;
 
 /**
  * A predicate that checks to see if a {@link android.test.suitebuilder.TestMethod} has a specific annotation on the
