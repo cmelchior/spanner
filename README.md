@@ -33,12 +33,21 @@ It is a fork of the original Caliper project for Java started by Google: code.go
 
 **Installing a local SNAPSHOT**
 
-    >./gradlew clean spanner:publishToMavenLocal
+    > ./gradlew spanner:publishToMavenLocal
 
+**Publishing a remote SNAPSHOT**
+ 
+   > ./gradlew spanner:artifactoryPublish
+   
+   
+**Release a new version**
 
-**Releasing a new version**
-
-
+1) Can we not use the release plugin?
+2) Update `version.txt` to proper version
+3) 
+   
+   > ./gradlew clean spanner:build spanner:bintrayUpload
+   
 
 # Benchmarking
 

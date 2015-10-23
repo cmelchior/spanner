@@ -1,12 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.jfrog.artifactory"
 apply plugin: 'ch.netzwerg.release'
 apply plugin: 'checkstyle'
 
-def currentVersion = file("${projectDir}/version.txt").text.trim();
-def version = currentVersion
+archivesBaseName = 'spanner'
 
 android {
     compileSdkVersion 23
@@ -52,31 +51,13 @@ dependencies {
     compile 'com.sun.jersey:jersey-client:1.11'
 }
 
-def commonPom = {
-    licenses {
-        license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
-        }
-    }
-    issueManagement {
-        system 'github'
-        url 'https://github.com/cmelchior/spanner/issues'
-    }
-    scm {
-        url 'scm:https://github.com/cmelchior/spanner'
-        connection 'scm:git@github.com:cmelchior/spanner.git'
-        developerConnection 'scm:git@github.com:cmelchior/spanner.git'
-    }
-}
-
 publishing {
     publications {
         library(MavenPublication) {
-            artifactId = 'spanner'
-            groupId = 'dk.ilios'
-            artifact file("${rootDir}/spanner/build/outputs/aar/spanner-release.aar")
+            groupId 'dk.ilios'
+            artifactId 'spanner'
+            version version
+            artifact file("${rootDir}/library/build/outputs/aar/library-release.aar")
             artifact sourcesJar
             artifact javadocJar
             pom.withXml {
@@ -85,7 +66,8 @@ publishing {
                 root.appendNode('description', 'Spanner is a micro benchmarking library for Android.')
                 root.appendNode('url', 'https://github.com/cmelchior/spanner')
 
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                //Iterate over the compile dependencies (we don't want the test ones),
+                // adding a <dependency> node for each
                 def dependenciesNode = asNode().appendNode('dependencies')
                 configurations.compile.allDependencies.each {
                     def dependencyNode = dependenciesNode.appendNode('dependency')
@@ -93,19 +75,34 @@ publishing {
                     dependencyNode.appendNode('artifactId', it.name)
                     dependencyNode.appendNode('version', it.version)
                 }
-                root.children().last() + commonPom
+
+                def issues = root.appendNode('issueManagement')
+                issues.appendNode('system', 'github')
+                issues.appendNode('url', 'https://github.com/cmelchior/spanner/issues')
+
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'scm:https://github.com/cmelchior/spanner')
+                scm.appendNode('connection', 'scm:git@github.com:cmelchior/spanner.git')
+                scm.appendNode('developerConnection', 'scm:git@github.com:cmelchior/spanner.git')
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'The Apache Software License, Version 2.0')
+                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
             }
         }
     }
 }
 
+// SNAPSHOT configuration
 artifactory {
-    contextUrl = 'https://oss.jfrog.org/artifactory'
+    contextUrl = 'https://oss.jfrog.org'
     publish {
         repository {
             repoKey = 'oss-snapshot-local'
             username = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noUser'
             password = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noKey'
+            maven = true
         }
         defaults {
             publications ('library')
@@ -113,23 +110,22 @@ artifactory {
     }
 }
 
+// Release configuration
 bintray {
+    // user and key come from the gradle.properties file in ~/.gradle
     user = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noUser'
-    key = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noKey'
-
-    dryRun = true
-    publish = false
-
+    key = project.hasProperty('spannerBintrayKey') ? spannerBintrayKey : 'noKey'
     publications = ['library']
+    publish = true
     pkg {
         repo = 'maven'
         name = 'spanner'
-        desc = 'Spanner - Microbencmarks on Android'
+        desc = 'Spanner - Microbenchmarks on Android'
         websiteUrl = 'https://github.com/cmelchior/spanner'
         issueTrackerUrl = 'https://github.com/cmelchior/spanner/issues'
         vcsUrl = 'https://github.com/cmelchior/spanner.git'
         licenses = ['Apache-2.0']
-        labels = ['aar', 'android', 'spanner', 'benchmark']
+        labels = ['android', 'spanner', 'benchmark']
         publicDownloadNumbers = false
     }
 }
@@ -157,6 +153,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
+
 artifacts {
     archives javadocJar
     archives sourcesJar
