@@ -101,7 +101,7 @@ artifactory {
         repository {
             repoKey = 'oss-snapshot-local'
             username = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noUser'
-            password = project.hasProperty('spannerBintrayUser') ? spannerBintrayUser : 'noKey'
+            password = project.hasProperty('spannerBintrayKey') ? spannerBintrayKey : 'noKey'
             maven = true
         }
         defaults {
