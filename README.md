@@ -1,3 +1,5 @@
+# DEPRECATED - Use https://developer.android.com/jetpack/androidx/releases/benchmark instead
+
 ![Spanner logo](logo.png)
 
 Spanner is a micro benchmarking framework designed to run on Android.
