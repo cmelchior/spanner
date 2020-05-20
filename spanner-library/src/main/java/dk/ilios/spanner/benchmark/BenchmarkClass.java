@@ -136,7 +136,7 @@ public final class BenchmarkClass {
 
     private void verifyBenchmarkMethod(Method method) throws InvalidBenchmarkException {
         int modifiers = method.getModifiers();
-        if (modifiers != Modifier.PUBLIC) {
+        if ((modifiers & Modifier.PUBLIC) != Modifier.PUBLIC) {
             throw new InvalidBenchmarkException("Benchmark methods must only be public: " + method.getName());
         }
 
@@ -155,7 +155,7 @@ public final class BenchmarkClass {
 
     private void verifyCustomMeasurementMethod(Method method) throws InvalidBenchmarkException {
         int modifiers = method.getModifiers();
-        if (modifiers != Modifier.PUBLIC) {
+        if ((modifiers & Modifier.PUBLIC) != Modifier.PUBLIC) {
             throw new InvalidBenchmarkException("Benchmark methods must only be public: " + method.getName());
         }
 
